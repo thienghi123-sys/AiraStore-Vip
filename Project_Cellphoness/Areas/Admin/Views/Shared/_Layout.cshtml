@@ -181,12 +181,295 @@
                 display: inline-block;
                 padding-bottom: 5px;
             }
+
+        /* ======================================================== */
+        /* CSS CHO AI COPILOT ADMIN (TỎA SÓNG + POPUP ACTION CARD) */
+        /* ======================================================== */
+        .admin-ai-container {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+        }
+
+        @@keyframes pulseAdminAI {
+            0% {
+                box-shadow: 0 0 0 0 rgba(215, 0, 24, 0.7);
+            }
+
+            70% {
+                box-shadow: 0 0 0 15px rgba(215, 0, 24, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(215, 0, 24, 0);
+            }
+        }
+
+        @@keyframes floatAdminTooltip {
+            0%, 100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-4px);
+            }
+        }
+
+        .admin-ai-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #fff;
+            border: 2.5px solid var(--red-cps);
+            cursor: pointer;
+            padding: 0;
+            overflow: hidden;
+            animation: pulseAdminAI 2s infinite;
+            transition: transform 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+            .admin-ai-btn:hover {
+                transform: scale(1.12);
+            }
+
+            .admin-ai-btn img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                border-radius: 50%;
+            }
+
+        .admin-ai-tooltip {
+            position: absolute;
+            right: 75px;
+            background: #212529;
+            color: #fff;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            border: 1px solid var(--red-cps);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            animation: floatAdminTooltip 2.5s ease-in-out infinite;
+        }
+
+            .admin-ai-tooltip::after {
+                content: "";
+                position: absolute;
+                right: -6px;
+                top: 50%;
+                transform: translateY(-50%) rotate(45deg);
+                width: 10px;
+                height: 10px;
+                background: #212529;
+                border-top: 1px solid var(--red-cps);
+                border-right: 1px solid var(--red-cps);
+            }
+
+        .admin-ai-chatbox {
+            position: fixed;
+            bottom: 105px;
+            right: 30px;
+            width: 380px;
+            background: #fff;
+            border-radius: 15px;
+            box-shadow: 0 10px 35px rgba(0,0,0,0.25);
+            display: none;
+            flex-direction: column;
+            z-index: 10000;
+            overflow: hidden;
+            border: 1px solid #ddd;
+            transform-origin: bottom right;
+            animation: scaleUpAdmin 0.25s ease-out forwards;
+        }
+
+        @@keyframes scaleUpAdmin {
+            0% {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .admin-ai-header {
+            background: linear-gradient(135deg, #212529, #D70018);
+            color: #fff;
+            padding: 14px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            font-size: 15px;
+        }
+
+        .admin-ai-close {
+            cursor: pointer;
+            font-size: 18px;
+            transition: 0.2s;
+        }
+
+            .admin-ai-close:hover {
+                transform: rotate(90deg);
+            }
+
+        .admin-ai-body {
+            padding: 15px;
+            height: 380px;
+            overflow-y: auto;
+            background: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .admin-msg-bubble {
+            max-width: 85%;
+            padding: 11px 15px;
+            border-radius: 15px;
+            font-size: 13.5px;
+            line-height: 1.5;
+            word-wrap: break-word;
+        }
+
+        .admin-msg-user {
+            background: var(--red-cps);
+            color: #fff;
+            align-self: flex-end;
+            border-bottom-right-radius: 2px;
+        }
+
+        .admin-msg-bot {
+            background: #fff;
+            color: #333;
+            align-self: flex-start;
+            border-bottom-left-radius: 2px;
+            border: 1px solid #e9ecef;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+        }
+
+        /* Thẻ Popup điều hướng (Đơn hàng / Doanh thu) trong khung chat Admin */
+        .admin-action-card {
+            display: flex;
+            align-items: center;
+            background: #fff;
+            border: 1.5px solid #ffcdd2;
+            border-left: 4px solid var(--red-cps);
+            border-radius: 10px;
+            padding: 10px 12px;
+            text-decoration: none;
+            color: #333;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.06);
+            transition: all 0.2s;
+            width: 88%;
+            align-self: flex-start;
+        }
+
+            .admin-action-card:hover {
+                transform: translateX(4px);
+                border-color: var(--red-cps);
+                background: #fff8f8;
+            }
+
+        .admin-card-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: #fce8eb;
+            color: var(--red-cps);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+
+        .admin-card-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .admin-card-title {
+            font-size: 13px;
+            font-weight: bold;
+            color: #212529;
+            margin-bottom: 2px;
+        }
+
+        .admin-card-sub {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .admin-card-badge {
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--red-cps);
+            margin-top: 2px;
+        }
+
+        .admin-ai-footer {
+            padding: 12px;
+            border-top: 1px solid #eee;
+            display: flex;
+            gap: 8px;
+            background: #fff;
+        }
+
+            .admin-ai-footer input {
+                flex: 1;
+                padding: 10px 15px;
+                border: 1px solid #ccc;
+                border-radius: 25px;
+                outline: none;
+                font-size: 13.5px;
+            }
+
+                .admin-ai-footer input:focus {
+                    border-color: var(--red-cps);
+                }
+
+            .admin-ai-footer button {
+                background: var(--red-cps);
+                color: #fff;
+                border: none;
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: 0.2s;
+            }
+
+                .admin-ai-footer button:hover {
+                    background: #b00012;
+                }
     </style>
 </head>
 <body>
 
     @{
         var adminLog = Session["TaiKhoan"] as Project_Cellphoness.Models.TaiKhoan;
+        // LINK ẢNH LOGO LINH VẬT AIRASTORE (Đồng bộ với trang khách hàng)
+        string linkLogoAI = Url.Content("~/Content/Images/logo-ai.png");
     }
 
     <div class="admin-sidebar">
@@ -212,8 +495,6 @@
             <li>
                 <a href="/Admin/QuanLyMaGiamGia"><i class="fa-solid fa-ticket"></i> Quản lý Mã giảm giá</a>
             </li>
-
-            <!-- Quản lý khách hàng hiển thị cho cả Admin và Nhân viên -->
             <li>
                 <a href="/Admin/QuanLyTaiKhoan"><i class="fa-solid fa-users"></i> Quản lý Khách hàng</a>
             </li>
@@ -222,7 +503,7 @@
             @if (adminLog != null && adminLog.MaChucVu == 1)
             {
                 <li>
-                    <a href="/Admin/QuanLyTaiKhoan/DanhSachNhanVien"><i class="fa-solid fa-user-tie"></i> Danh sách  Tài Khoản Nhân viên</a>
+                    <a href="/Admin/QuanLyTaiKhoan/DanhSachNhanVien"><i class="fa-solid fa-user-tie"></i> Danh sách Tài Khoản Nhân viên</a>
                 </li>
                 <li>
                     <a href="/Admin/QuanLyTaiKhoan/DanhSachAdmin"><i class="fa-solid fa-user-shield"></i> Phân Quyền Admin</a>
@@ -246,7 +527,6 @@
             <h3 style="margin: 0; color: #555;"><i class="fa-solid fa-chart-line"></i> Bảng Điều Khiển Hệ Thống</h3>
 
             <div class="admin-user">
-
                 <a href="@Url.Action("Index", "QuanLyDanhGia")" class="btn-header-action btn-header-comment">
                     <i class="fa-solid fa-comments"></i> Duyệt bình luận
                 </a>
@@ -271,5 +551,122 @@
         </div>
     </div>
 
+    <!-- ======================================================== -->
+    <!-- KHU VỰC TRỢ LÝ AI COPILOT DÀNH RIÊNG CHO ADMIN -->
+    <!-- ======================================================== -->
+    <div class="admin-ai-container">
+        <div id="adminAiTooltip" class="admin-ai-tooltip" onclick="toggleAdminAIChat()">
+            <i class="fa-solid fa-bolt" style="color: #ffc107;"></i> Trợ lý Admin:hỗ tợ tra cứu 24/7
+        </div>
+        <button class="admin-ai-btn" onclick="toggleAdminAIChat()" title="Mở Trợ lý Quản trị Aira">
+            <img src="@linkLogoAI" alt="Admin AI" onerror="this.src='https://i.postimg.cc/Z9Y0cNkC/548a4112b9687cca06cdffe9.png'" />
+        </button>
+    </div>
+
+    <div id="adminAiChatBox" class="admin-ai-chatbox">
+        <div class="admin-ai-header">
+            <span style="display: flex; align-items: center; gap: 8px;">
+                <img src="@linkLogoAI" style="width: 28px; height: 28px; border-radius: 50%; background: #fff; object-fit: cover;" onerror="this.src='https://cdn-icons-png.flaticon.com/512/4712/4712035.png'" />
+                Aira Copilot - Trợ Lý Quản Trị
+            </span>
+            <i class="fa-solid fa-xmark admin-ai-close" onclick="toggleAdminAIChat()"></i>
+        </div>
+        <div class="admin-ai-body" id="adminAiBody">
+            <div class="admin-msg-bubble admin-msg-bot">
+                Chào Sếp <b>@(adminLog != null ? adminLog.HoTen : "")</b>! bố m là Aira. có j cần giúp thì sủa lẹ:<br />
+                • <i>"Tra đơn hàng của khách 125Khoa"</i><br />
+                • <i>"Doanh thu tháng 7 năm 2026"</i><br />
+                • <i>"Kiểm tra máy sắp hết hàng"</i>
+            </div>
+        </div>
+        <div class="admin-ai-footer">
+            <input type="text" id="adminAiInput" placeholder="Nhập lệnh tra cứu cho Aira..." onkeypress="if(event.key==='Enter') sendAdminAIMessage()" autocomplete="off" />
+            <button onclick="sendAdminAIMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+    <script>
+        function toggleAdminAIChat() {
+            const box = document.getElementById('adminAiChatBox');
+            const tooltip = document.getElementById('adminAiTooltip');
+            if (box.style.display === 'flex') {
+                box.style.display = 'none';
+                if (tooltip) tooltip.style.display = 'flex';
+            } else {
+                box.style.display = 'flex';
+                if (tooltip) tooltip.style.display = 'none';
+                document.getElementById('adminAiInput').focus();
+            }
+        }
+
+        function sendAdminAIMessage() {
+            const input = document.getElementById('adminAiInput');
+            const msg = input.value.trim();
+            if (!msg) return;
+
+            appendAdminMsg(msg, 'user');
+            input.value = '';
+
+            const typingId = 'admin-typing-' + Date.now();
+            appendAdminMsg('<i class="fa-solid fa-spinner fa-spin"></i> Đang truy xuất dữ liệu hệ thống...', 'bot', typingId);
+
+            fetch('/Admin/Home/TroLyAdminAI', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ cauLenh: msg })
+            })
+            .then(res => res.json())
+            .then(data => {
+                const typingEl = document.getElementById(typingId);
+                if (typingEl) typingEl.remove();
+
+                if (data.success) {
+                    appendAdminMsg(data.answer, 'bot');
+                    if (data.cards && data.cards.length > 0) {
+                        data.cards.forEach(c => appendAdminActionCard(c));
+                    }
+                } else {
+                    appendAdminMsg('Lỗi xử lý: ' + (data.message || 'Không thể kết nối CSDL.'), 'bot');
+                }
+            })
+            .catch(err => {
+                const typingEl = document.getElementById(typingId);
+                if (typingEl) typingEl.remove();
+                appendAdminMsg('Lỗi kết nối Server Admin AI!', 'bot');
+            });
+        }
+
+        function appendAdminMsg(text, sender, id = '') {
+            const body = document.getElementById('adminAiBody');
+            const div = document.createElement('div');
+            div.className = `admin-msg-bubble admin-msg-${sender}`;
+            if (id) div.id = id;
+            div.innerHTML = text.replace(/\n/g, '<br/>');
+            body.appendChild(div);
+            body.scrollTop = body.scrollHeight;
+        }
+
+        function appendAdminActionCard(card) {
+            const body = document.getElementById('adminAiBody');
+            const a = document.createElement('a');
+            a.className = 'admin-action-card';
+            a.href = card.Url;
+
+            a.innerHTML = `
+                <div class="admin-card-icon">
+                    <i class="${card.Icon || 'fa-solid fa-arrow-up-right-from-square'}"></i>
+                </div>
+                <div class="admin-card-info">
+                    <span class="admin-card-title">${card.Title}</span>
+                    <span class="admin-card-sub">${card.SubTitle}</span>
+                    <span class="admin-card-badge">${card.Badge}</span>
+                </div>
+                <i class="fa-solid fa-chevron-right" style="color: #999; font-size: 12px;"></i>
+            `;
+
+            body.appendChild(a);
+            body.scrollTop = body.scrollHeight;
+        }
+    </script>
 </body>
 </html>

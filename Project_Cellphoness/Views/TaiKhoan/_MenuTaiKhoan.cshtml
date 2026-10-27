@@ -1,0 +1,277 @@
+﻿@using Project_Cellphoness.Models
+@using Project_Cellphoness.Helpers
+@{
+    var sessionTk = Session["TaiKhoan"] as TaiKhoan;
+    CellphonesStoreEntities1 dbMenu = new CellphonesStoreEntities1();
+    var userMenu = sessionTk != null ? dbMenu.TaiKhoan.Find(sessionTk.MaTK) : new TaiKhoan { HoTen = "Khách hàng", DiemTichLuy = 0, DiemHienTai = 0 };
+    string hangTV = DiemThuongHelper.LayHangThanhVien(userMenu.DiemTichLuy);
+    string currentAction = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+    string currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+
+    // Đường dẫn ảnh avatar (nếu chưa có thì dùng icon mặc định)
+    string avatarUrl = !string.IsNullOrEmpty(userMenu.Avatar) ? Url.Content(userMenu.Avatar) : "";
+}
+
+<style>
+    .profile-sidebar {
+        width: 280px;
+        background: #fff;
+        border-radius: 12px;
+        padding: 20px 0;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+        height: fit-content;
+        flex-shrink: 0;
+    }
+
+    .profile-user-info {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 0 20px 20px 20px;
+        border-bottom: 1px solid #eee;
+        margin-bottom: 10px;
+    }
+
+    /* KHUNG AVATAR CÓ NÚT ĐỔI ẢNH KHI RÊ CHUỘT */
+    .profile-avatar-container {
+        position: relative;
+        width: 55px;
+        height: 55px;
+        border-radius: 50%;
+        cursor: pointer;
+    }
+
+    .profile-avatar {
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #fce8eb, #ffdde1);
+        border: 2px solid #D70018;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        color: #D70018;
+        overflow: hidden;
+    }
+
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+    .avatar-overlay-edit {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 16px;
+        opacity: 0;
+        transition: opacity 0.25s ease;
+    }
+
+    .profile-avatar-container:hover .avatar-overlay-edit {
+        opacity: 1;
+    }
+
+    .profile-name {
+        font-weight: 800;
+        color: #222;
+        font-size: 16px;
+    }
+
+    .tier-badge {
+        display: inline-block;
+        background: linear-gradient(90deg, #ff9a44, #fc6076);
+        color: #fff;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 800;
+        margin-top: 5px;
+        text-transform: uppercase;
+        box-shadow: 0 2px 5px rgba(252, 96, 118, 0.35);
+    }
+
+    .profile-menu {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+        .profile-menu li {
+            margin: 4px 10px;
+        }
+
+            .profile-menu li a {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                padding: 12px 16px;
+                color: #444;
+                text-decoration: none;
+                font-size: 14.5px;
+                font-weight: 600;
+                border-radius: 8px;
+                transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+            }
+
+                .profile-menu li a i {
+                    width: 22px;
+                    text-align: center;
+                    font-size: 17px;
+                    transition: transform 0.25s ease;
+                }
+
+                .profile-menu li a:hover {
+                    background: #fdf2f3;
+                    color: #D70018;
+                    transform: translateX(5px);
+                }
+
+                    .profile-menu li a:hover i {
+                        transform: scale(1.2);
+                    }
+
+                .profile-menu li a.active {
+                    background: #fce8eb;
+                    color: #D70018;
+                    border-left: 4px solid #D70018;
+                    font-weight: 700;
+                }
+
+    /* NÚT MINI GAME MÀU VÀNG NỔI BẬT */
+    @@keyframes pulseGoldGame {
+        0% {
+            box-shadow: 0 0 0 0 rgba(255, 184, 0, 0.6);
+        }
+
+        70% {
+            box-shadow: 0 0 0 10px rgba(255, 184, 0, 0);
+        }
+
+        100% {
+            box-shadow: 0 0 0 0 rgba(255, 184, 0, 0);
+        }
+    }
+
+    @@keyframes wiggleGameIcon {
+        0%, 100% {
+            transform: rotate(0deg) scale(1);
+        }
+
+        25% {
+            transform: rotate(-12deg) scale(1.15);
+        }
+
+        75% {
+            transform: rotate(12deg) scale(1.15);
+        }
+    }
+
+    .profile-menu li a.btn-minigame-menu {
+        background: linear-gradient(135deg, #FFD700, #FF8C00);
+        color: #fff !important;
+        font-weight: 800;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        animation: pulseGoldGame 2s infinite;
+        margin-top: 8px;
+        margin-bottom: 8px;
+    }
+
+        .profile-menu li a.btn-minigame-menu i {
+            color: #fff !important;
+            animation: wiggleGameIcon 1.5s infinite ease-in-out;
+        }
+
+    .badge-hot-game {
+        margin-left: auto;
+        background: #D70018;
+        color: #fff;
+        font-size: 10px;
+        padding: 2px 7px;
+        border-radius: 10px;
+        font-weight: 900;
+    }
+</style>
+
+<div class="profile-sidebar">
+    <div class="profile-user-info">
+        <!-- BẤM VÀO AVATAR ĐỂ ĐỔI ẢNH -->
+        <div class="profile-avatar-container" onclick="document.getElementById('avatarFileInput').click();" title="Bấm để đổi ảnh đại diện">
+            <div class="profile-avatar">
+                @if (!string.IsNullOrEmpty(avatarUrl))
+                {
+                    <img src="@avatarUrl" alt="Avatar" />
+                }
+                else
+                {
+                    <i class="fa-solid fa-user"></i>
+                }
+            </div>
+            <div class="avatar-overlay-edit">
+                <i class="fa-solid fa-camera"></i>
+            </div>
+        </div>
+
+        <div>
+            <div style="font-size: 12px; color: #888;">Tài khoản của</div>
+            <div class="profile-name">@userMenu.HoTen</div>
+            <div class="tier-badge"><i class="fa-solid fa-medal"></i> @hangTV</div>
+        </div>
+    </div>
+
+    <!-- FORM ẨN ĐỂ UPLOAD ẢNH ĐẠI DIỆN -->
+    @using (Html.BeginForm("CapNhatAvatar", "TaiKhoan", FormMethod.Post, new { enctype = "multipart/form-data", id = "avatarForm" }))
+    {
+        @Html.AntiForgeryToken()
+        <input type="file" id="avatarFileInput" name="avatarFile" accept="image/*" style="display:none;" onchange="document.getElementById('avatarForm').submit();" />
+    }
+
+    <ul class="profile-menu">
+        <li>
+            <a href="@Url.Action("ThongTinCaNhan", "TaiKhoan")" class="@(currentAction == "ThongTinCaNhan" ? "active" : "")">
+                <i class="fa-regular fa-id-card"></i> Hồ sơ của tôi
+            </a>
+        </li>
+        <li>
+            <a href="@Url.Action("LichSuDonHang", "TaiKhoan")" class="@(currentAction == "LichSuDonHang" ? "active" : "")">
+                <i class="fa-solid fa-clipboard-list"></i> Lịch sử đơn hàng
+            </a>
+        </li>
+        <li>
+            <a href="@Url.Action("ViVoucher", "DoiThuong")" class="@(currentAction == "ViVoucher" ? "active" : "")">
+                <i class="fa-solid fa-ticket"></i> Ví Voucher của tôi
+            </a>
+        </li>
+        <li>
+            <a href="@Url.Action("Index", "DoiThuong")" class="@(currentController == "DoiThuong" && currentAction == "Index" ? "active" : "")">
+                <i class="fa-solid fa-gift"></i> Đổi thêm Voucher
+            </a>
+        </li>
+        <li>
+            <a href="@Url.Action("MiniGame", "TaiKhoan")" class="btn-minigame-menu @(currentAction == "MiniGame" ? "active" : "")">
+                <i class="fa-solid fa-gamepad"></i> Mini Game X2 Điểm
+                <span class="badge-hot-game">HOT</span>
+            </a>
+        </li>
+        <li>
+            <a href="@Url.Action("DoiMatKhau", "TaiKhoan")" class="@(currentAction == "DoiMatKhau" ? "active" : "")">
+                <i class="fa-solid fa-lock"></i> Đổi mật khẩu
+            </a>
+        </li>
+        <li>
+            <a href="@Url.Action("DangXuat", "TaiKhoan")" style="color: #dc3545;">
+                <i class="fa-solid fa-power-off"></i> Đăng xuất
+            </a>
+        </li>
+    </ul>
+</div>

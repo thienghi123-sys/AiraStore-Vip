@@ -1,0 +1,653 @@
+﻿@model Project_Cellphoness.Models.TaiKhoan
+@{
+    ViewBag.Title = "Mini Game Kéo Búa Bao - X2 Điểm Thưởng";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    string linkMascot = Url.Content("~/Content/Images/logo-ai.png");
+}
+
+<style>
+    .profile-page {
+        display: flex;
+        gap: 20px;
+        margin-top: 20px;
+    }
+
+    .game-wrapper {
+        flex: 1;
+        background: linear-gradient(180deg, #fff 0%, #fff9f9 100%);
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 6px 20px rgba(215, 0, 24, 0.08);
+        border: 1px solid #ffccd2;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .game-header-banner {
+        background: linear-gradient(135deg, #D70018, #ff4b2b);
+        color: #fff;
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 15px rgba(215, 0, 24, 0.25);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    .game-title-box {
+        text-align: left;
+    }
+
+        .game-title-box h2 {
+            margin: 0 0 5px 0;
+            font-size: 24px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .game-title-box p {
+            margin: 0;
+            font-size: 14px;
+            opacity: 0.95;
+        }
+
+    .user-point-wallet {
+        background: rgba(255, 255, 255, 0.2);
+        border: 2px solid #FFD700;
+        padding: 10px 20px;
+        border-radius: 30px;
+        font-size: 16px;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        backdrop-filter: blur(5px);
+    }
+
+        .user-point-wallet span {
+            font-size: 22px;
+            font-weight: 900;
+            color: #FFD700;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+
+    /* SÀN ĐẤU KÉO BÚA BAO */
+    .battle-arena {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 40px;
+        margin: 25px 0;
+        padding: 25px;
+        background: #fff;
+        border-radius: 15px;
+        border: 2px dashed #ffcdd2;
+    }
+
+    .fighter-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 160px;
+    }
+
+    .fighter-avatar {
+        width: 110px;
+        height: 110px;
+        border-radius: 50%;
+        background: #fdf2f3;
+        border: 3px solid #D70018;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 48px;
+        color: #D70018;
+        box-shadow: 0 6px 15px rgba(215, 0, 24, 0.15);
+        margin-bottom: 10px;
+        transition: 0.3s;
+    }
+
+    .fighter-name {
+        font-weight: 800;
+        color: #333;
+        font-size: 15px;
+    }
+
+    .vs-badge {
+        font-size: 32px;
+        font-weight: 900;
+        color: #D70018;
+        font-style: italic;
+        text-shadow: 2px 2px 0px #ffd700;
+    }
+
+    @@keyframes shakeHand {
+        0%, 100% {
+            transform: translateY(0) rotate(0deg);
+        }
+
+        50% {
+            transform: translateY(-18px) rotate(-15deg);
+        }
+    }
+
+    .shaking {
+        animation: shakeHand 0.35s infinite ease-in-out;
+    }
+
+    /* KHU VỰC ĐẶT CƯỢC */
+    .bet-control-panel {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 12px;
+        max-width: 500px;
+        margin: 0 auto 25px auto;
+        border: 1px solid #e9ecef;
+    }
+
+    .bet-label {
+        font-weight: 700;
+        color: #444;
+        margin-bottom: 12px;
+        display: block;
+        font-size: 15px;
+    }
+
+    .bet-stepper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .btn-step {
+        width: 45px;
+        height: 45px;
+        border-radius: 10px;
+        border: none;
+        background: #D70018;
+        color: #fff;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+        .btn-step:hover {
+            background: #a80012;
+            transform: scale(1.08);
+        }
+
+    .bet-input {
+        width: 150px;
+        height: 45px;
+        text-align: center;
+        font-size: 20px;
+        font-weight: 900;
+        color: #D70018;
+        border: 2px solid #D70018;
+        border-radius: 10px;
+        outline: none;
+    }
+
+    .quick-bet-btns {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 12px;
+    }
+
+    .btn-quick-bet {
+        background: #fff;
+        border: 1px solid #ccc;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 12.5px;
+        font-weight: 700;
+        cursor: pointer;
+        color: #555;
+        transition: 0.2s;
+    }
+
+        .btn-quick-bet:hover {
+            border-color: #D70018;
+            color: #D70018;
+            background: #fff5f5;
+        }
+
+    /* CHỌN KÉO - BÚA - BAO */
+    .choice-group {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin-bottom: 25px;
+    }
+
+    .choice-item {
+        width: 120px;
+        padding: 18px 10px;
+        border-radius: 14px;
+        border: 2.5px solid #e0e0e0;
+        background: #fff;
+        cursor: pointer;
+        transition: all 0.25s;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+    }
+
+        .choice-item i {
+            font-size: 38px;
+            color: #555;
+            transition: 0.25s;
+        }
+
+        .choice-item span {
+            font-weight: 800;
+            font-size: 15px;
+            color: #333;
+        }
+
+        .choice-item:hover {
+            transform: translateY(-5px);
+            border-color: #ff9800;
+            box-shadow: 0 6px 15px rgba(255, 152, 0, 0.2);
+        }
+
+        .choice-item.selected {
+            border-color: #D70018;
+            background: #fff0f2;
+            box-shadow: 0 6px 18px rgba(215, 0, 24, 0.25);
+            transform: translateY(-5px) scale(1.05);
+        }
+
+            .choice-item.selected i {
+                color: #D70018;
+            }
+
+    .btn-play-now {
+        background: linear-gradient(135deg, #FFD700, #FF8C00);
+        color: #fff;
+        border: none;
+        padding: 15px 50px;
+        border-radius: 35px;
+        font-size: 18px;
+        font-weight: 900;
+        cursor: pointer;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        box-shadow: 0 6px 20px rgba(255, 140, 0, 0.4);
+        transition: 0.3s;
+    }
+
+        .btn-play-now:hover {
+            transform: scale(1.06);
+            box-shadow: 0 8px 25px rgba(255, 140, 0, 0.6);
+        }
+
+    /* POPUP KẾT QUẢ CÓ LINH VẬT SHOP CHÚC MỪNG / CHIA BUỒN */
+    .mascot-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.65);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 20000;
+        backdrop-filter: blur(4px);
+    }
+
+    .mascot-modal-box {
+        background: #fff;
+        width: 400px;
+        border-radius: 20px;
+        padding: 30px 25px;
+        text-align: center;
+        position: relative;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        animation: popInModal 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+
+    @@keyframes popInModal {
+        0% {
+            opacity: 0;
+            transform: scale(0.5);
+        }
+
+        100% {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    .mascot-img-wrapper {
+        width: 120px;
+        height: 120px;
+        margin: 0 auto 15px auto;
+        border-radius: 50%;
+        padding: 4px;
+        position: relative;
+    }
+
+        .mascot-img-wrapper img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            background: #fff;
+        }
+
+    .mascot-emotion-badge {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        color: #fff;
+        border: 3px solid #fff;
+    }
+
+    .modal-win .mascot-img-wrapper {
+        background: linear-gradient(135deg, #FFD700, #28a745);
+        box-shadow: 0 0 25px rgba(255, 215, 0, 0.7);
+    }
+
+    .modal-lose .mascot-img-wrapper {
+        background: linear-gradient(135deg, #6c757d, #dc3545);
+        filter: grayscale(25%);
+    }
+
+    .modal-draw .mascot-img-wrapper {
+        background: linear-gradient(135deg, #17a2b8, #007bff);
+    }
+
+    .result-title {
+        font-size: 24px;
+        font-weight: 900;
+        margin: 10px 0 8px 0;
+        text-transform: uppercase;
+    }
+
+    .result-desc {
+        font-size: 14.5px;
+        color: #555;
+        line-height: 1.5;
+        margin-bottom: 15px;
+    }
+
+    .result-point-badge {
+        display: inline-block;
+        padding: 8px 20px;
+        border-radius: 25px;
+        font-size: 18px;
+        font-weight: 900;
+        margin-bottom: 20px;
+    }
+
+    .btn-close-modal {
+        background: #D70018;
+        color: #fff;
+        border: none;
+        padding: 12px 35px;
+        border-radius: 25px;
+        font-weight: bold;
+        font-size: 15px;
+        cursor: pointer;
+        width: 100%;
+        transition: 0.2s;
+    }
+
+        .btn-close-modal:hover {
+            background: #b00014;
+        }
+</style>
+
+<div class="profile-page">
+    @Html.Partial("~/Views/TaiKhoan/_MenuTaiKhoan.cshtml")
+
+    <div class="game-wrapper">
+        <div class="game-header-banner">
+            <div class="game-title-box">
+                <h2><i class="fa-solid fa-gamepad"></i> Hãy Thử Ngay Kéo Búa Bao </h2>
+                <p>Chan Chan Chan bố m đi !!!!!</p>
+            </div>
+            <div class="user-point-wallet">
+                <i class="fa-solid fa-coins" style="color: #FFD700; font-size: 22px;"></i>
+                Điểm hiện có: <span id="lblCurrentPoints">@(Model.DiemHienTai ?? 0)</span>
+            </div>
+        </div>
+
+        <!-- SÀN ĐẤU -->
+        <div class="battle-arena">
+            <div class="fighter-card">
+                <div id="userHandBox" class="fighter-avatar">
+                    <i id="userHandIcon" class="fa-solid fa-hand-back-fist"></i>
+                </div>
+                <div class="fighter-name">Bạn (@Model.HoTen.Split(' ').Last())</div>
+            </div>
+
+            <div class="vs-badge">VS</div>
+
+            <div class="fighter-card">
+                <div id="botHandBox" class="fighter-avatar" style="border-color: #ff9800; background: #fff8e1; color: #ff9800;">
+                    <i id="botHandIcon" class="fa-solid fa-robot"></i>
+                </div>
+                <div class="fighter-name">Chú Khỉ Nhỏ</div>
+            </div>
+        </div>
+
+        
+        <div class="bet-control-panel">
+            <span class="bet-label"><i class="fa-solid fa-sack-dollar" style="color:#D70018;"></i> Nhập hoặc chọn số điểm muốn cược (Tối thiểu 50 điểm):</span>
+            <div class="bet-stepper">
+                <button type="button" class="btn-step" onclick="adjustBet(-50)" title="Giảm 50 điểm">-50</button>
+                <input type="number" id="txtBetPoints" class="bet-input" value="50" min="50" step="50" />
+                <button type="button" class="btn-step" onclick="adjustBet(50)" title="Tăng 50 điểm">+50</button>
+            </div>
+            <div class="quick-bet-btns">
+                <button type="button" class="btn-quick-bet" onclick="setBet(50)">50 điểm</button>
+                <button type="button" class="btn-quick-bet" onclick="setBet(100)">100 điểm</button>
+                <button type="button" class="btn-quick-bet" onclick="setBet(200)">200 điểm</button>
+                <button type="button" class="btn-quick-bet" onclick="setBet(500)">500 điểm</button>
+                <button type="button" class="btn-quick-bet" onclick="setBetAll()">Tất tay (All-in)</button>
+            </div>
+        </div>
+
+        
+        <div style="margin-bottom: 12px; font-weight: 700; color: #333;">Hãy chọn option :</div>
+        <div class="choice-group">
+            <div class="choice-item selected" onclick="selectWeapon('keo', this)">
+                <i class="fa-solid fa-hand-scissors"></i>
+                <span>KÉO</span>
+            </div>
+            <div class="choice-item" onclick="selectWeapon('bua', this)">
+                <i class="fa-solid fa-hand-back-fist"></i>
+                <span>BÚA</span>
+            </div>
+            <div class="choice-item" onclick="selectWeapon('bao', this)">
+                <i class="fa-solid fa-hand"></i>
+                <span>BAO</span>
+            </div>
+        </div>
+
+        <button type="button" id="btnStartGame" class="btn-play-now" onclick="playRockPaperScissors()">
+            <i class="fa-solid fa-bolt"></i> Chan 
+        </button>
+    </div>
+</div>
+
+<!-- POPUP LINH VẬT CHÚC MỪNG / CHIA BUỒN -->
+<div id="mascotResultModal" class="mascot-modal-overlay">
+    <div id="mascotModalBox" class="mascot-modal-box">
+        <div class="mascot-img-wrapper">
+            <img src="@linkMascot" alt="Aira Mascot" onerror="this.src='https://i.postimg.cc/Z9Y0cNkC/548a4112b9687cca06cdffe9.png'" />
+            <div id="mascotEmotionBadge" class="mascot-emotion-badge">🎉</div>
+        </div>
+        <h3 id="modalResultTitle" class="result-title">Chấp!</h3>
+        <div id="modalPointBadge" class="result-point-badge">+100 Điểm</div>
+        <p id="modalResultDesc" class="result-desc"></p>
+        <div style="font-size: 13px; color: #666; margin-bottom: 18px;">
+            Tổng điểm hiện tại của bạn: <b id="modalNewTotalPoints" style="color: #28a745; font-size: 16px;">0</b> điểm
+        </div>
+        <button type="button" class="btn-close-modal" onclick="closeMascotModal()">CHƠI TIẾP VÁN MỚI</button>
+    </div>
+</div>
+
+<script>
+    let currentWeapon = 'keo';
+    const iconMap = {
+        'keo': 'fa-solid fa-hand-scissors',
+        'bua': 'fa-solid fa-hand-back-fist',
+        'bao': 'fa-solid fa-hand'
+    };
+
+    function selectWeapon(weapon, el) {
+        currentWeapon = weapon;
+        document.querySelectorAll('.choice-item').forEach(item => item.classList.remove('selected'));
+        el.classList.add('selected');
+        document.getElementById('userHandIcon').className = iconMap[weapon];
+    }
+
+    function adjustBet(delta) {
+        const input = document.getElementById('txtBetPoints');
+        let val = parseInt(input.value) || 50;
+        val += delta;
+        if (val < 50) val = 50;
+        input.value = val;
+    }
+
+    function setBet(amount) {
+        document.getElementById('txtBetPoints').value = amount;
+    }
+
+    function setBetAll() {
+        const currentPts = parseInt(document.getElementById('lblCurrentPoints').innerText) || 0;
+        document.getElementById('txtBetPoints').value = currentPts >= 50 ? currentPts : 50;
+    }
+
+    function playRockPaperScissors() {
+        const betPoints = parseInt(document.getElementById('txtBetPoints').value) || 0;
+        const currentPts = parseInt(document.getElementById('lblCurrentPoints').innerText) || 0;
+
+        if (betPoints < 50) {
+            alert('Mức cược tối thiểu là 50 điểm bạn nhé!');
+            document.getElementById('txtBetPoints').value = 50;
+            return;
+        }
+        if (betPoints > currentPts) {
+            alert('Số điểm cược vượt quá số điểm hiện có của bạn (' + currentPts + ' điểm)!');
+            return;
+        }
+
+        const btn = document.getElementById('btnStartGame');
+        const userBox = document.getElementById('userHandBox');
+        const botBox = document.getElementById('botHandBox');
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> ĐANG OẲN TÙ TÌ...';
+
+        userBox.classList.add('shaking');
+        botBox.classList.add('shaking');
+        document.getElementById('botHandIcon').className = 'fa-solid fa-hand-back-fist';
+
+        fetch('/TaiKhoan/ChoiKeoBuaBao', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ diemCuoc: betPoints, luaChon: currentWeapon })
+        })
+        .then(res => res.json())
+        .then(data => {
+            setTimeout(() => {
+                userBox.classList.remove('shaking');
+                botBox.classList.remove('shaking');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-bolt"></i> RA CHIÊU QUYẾT ĐẤU!';
+
+                if (!data.success) {
+                    alert(data.message);
+                    return;
+                }
+
+                // Cập nhật icon ra chiêu của 2 bên
+                document.getElementById('userHandIcon').className = iconMap[data.userChoice];
+                document.getElementById('botHandIcon').className = iconMap[data.botChoice];
+
+                // Cập nhật điểm mới trên màn hình
+                document.getElementById('lblCurrentPoints').innerText = data.newPoints;
+
+                // Hiển thị Popup Linh vật AiraStore
+                showMascotModal(data);
+            }, 600);
+        })
+        .catch(err => {
+            userBox.classList.remove('shaking');
+            botBox.classList.remove('shaking');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-bolt"></i> RA CHIÊU QUYẾT ĐẤU!';
+            alert('Có lỗi kết nối máy chủ, vui lòng thử lại!');
+        });
+    }
+
+    function showMascotModal(data) {
+        const modal = document.getElementById('mascotResultModal');
+        const box = document.getElementById('mascotModalBox');
+        const title = document.getElementById('modalResultTitle');
+        const badge = document.getElementById('modalPointBadge');
+        const desc = document.getElementById('modalResultDesc');
+        const emotion = document.getElementById('mascotEmotionBadge');
+        const totalPts = document.getElementById('modalNewTotalPoints');
+
+        box.className = 'mascot-modal-box';
+        totalPts.innerText = data.newPoints;
+        desc.innerText = data.message;
+
+        if (data.result === 'thang') {
+            box.classList.add('modal-win');
+            title.innerText = '🎉 Aira Chúc Mừng Bạn!';
+            title.style.color = '#28a745';
+            badge.innerText = 'THẮNG X2 (+' + data.pointChange + ' Điểm)';
+            badge.style.background = '#d4edda';
+            badge.style.color = '#155724';
+            emotion.innerText = '🥰';
+            emotion.style.background = '#28a745';
+        } else if (data.result === 'thua') {
+            box.classList.add('modal-lose');
+            title.innerText = '🥺 Aira Chia Buồn Nhé!';
+            title.style.color = '#dc3545';
+            badge.innerText = data.pointChange + ' Điểm';
+            badge.style.background = '#f8d7da';
+            badge.style.color = '#721c24';
+            emotion.innerText = '😭';
+            emotion.style.background = '#dc3545';
+        } else {
+            box.classList.add('modal-draw');
+            title.innerText = '🤝 Bất Phân Thắng Bại!';
+            title.style.color = '#007bff';
+            badge.innerText = 'Hoàn tiền cược (0 Điểm)';
+            badge.style.background = '#d1ecf1';
+            badge.style.color = '#0c5460';
+            emotion.innerText = '😮';
+            emotion.style.background = '#17a2b8';
+        }
+
+        modal.style.display = 'flex';
+    }
+
+    function closeMascotModal() {
+        document.getElementById('mascotResultModal').style.display = 'none';
+    }
+</script>

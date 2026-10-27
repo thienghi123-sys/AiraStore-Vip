@@ -125,11 +125,23 @@ namespace Project_Cellphoness.Controllers
 
             if (lstGioHang.Count == 0)
             {
-                ViewBag.ThongBao = "Giỏ hàng của bạn đang trống! Hãy chọn cho mình một chiếc điện thoại ưng ý nhé.";
+                ViewBag.ThongBao = "Giỏ hàng của bạn đang trống! Hãy chọn cho mình một sản phẩm ưng ý nhé.";
             }
             else
             {
                 ViewBag.TongTien = lstGioHang.Sum(n => n.dThanhTien);
+
+                // --- LOGIC MỚI: LẤY DANH SÁCH VOUCHER TRONG VÍ CỦA KHÁCH ---
+                // --- LOGIC MỚI: LẤY DANH SÁCH VOUCHER TRONG VÍ CỦA KHÁCH ---
+                var lstVi = (from vi in db.ViVoucher
+                             join mg in db.MaGiamGia on vi.MaVoucher equals mg.MaVoucher
+                             where vi.MaTK == tk.MaTK
+                                   && vi.TrangThaiSD == false // Chưa sử dụng
+                                   && mg.NgayKetThuc >= DateTime.Now // Chưa hết hạn
+                             orderby vi.NgayDoi descending
+                             select mg).ToList(); // SỬA Ở ĐÂY: Select nguyên đối tượng mg luôn
+
+                ViewBag.DanhSachVi = lstVi;
             }
 
             return View(lstGioHang);
@@ -266,7 +278,6 @@ namespace Project_Cellphoness.Controllers
                 dh.NgayDat = DateTime.Now;
                 dh.MaTK = tk.MaTK;
 
-                // Trả về đúng code map 1:1 từ Form nguyên thủy
                 dh.PhuongThucTT = collection["PhuongThucTT"];
                 dh.HoTenNhan = collection["TenKhachHang"];
                 dh.SDTNhan = collection["SoDienThoai"];
@@ -301,6 +312,35 @@ namespace Project_Cellphoness.Controllers
                     sp.SoLuongTon -= item.iSoLuong;
                 }
                 db.SaveChanges();
+
+                // ========================================================
+                // BIG UPDATE GIAI ĐOẠN 4: ĐỐT MÃ VOUCHER KHI ĐẶT HÀNG
+                // ========================================================
+                if (Session["Voucher"] != null)
+                {
+                    var sessionVoucher = Session["Voucher"] as MaGiamGia;
+
+                    if (sessionVoucher.HienThiDoiThuong == true)
+                    {
+                        // 1. Nếu là mã điểm thưởng: Đổi trạng thái trong Ví thành Đã Sử Dụng (true)
+                        var vi = db.ViVoucher.FirstOrDefault(v => v.MaTK == tk.MaTK && v.MaVoucher == sessionVoucher.MaVoucher && v.TrangThaiSD == false);
+                        if (vi != null)
+                        {
+                            vi.TrangThaiSD = true;
+                        }
+                    }
+                    else
+                    {
+                        // 2. Nếu là mã Public đại trà: Trừ số lượng trong kho MaGiamGia
+                        var vcDb = db.MaGiamGia.SingleOrDefault(v => v.MaVoucher == sessionVoucher.MaVoucher);
+                        if (vcDb != null && vcDb.SoLuong > 0)
+                        {
+                            vcDb.SoLuong--;
+                        }
+                    }
+                    db.SaveChanges();
+                }
+                // ========================================================
 
                 string cookieName = "GioHangCookie_" + tk.MaTK;
 
@@ -385,7 +425,6 @@ namespace Project_Cellphoness.Controllers
             }
             catch (Exception ex)
             {
-                // MÁY QUÉT LỖI SÂU: Nếu CSDL vẫn báo lỗi, nó sẽ in rõ tên cột bị sai ra màn hình
                 string msg = ex.Message;
                 if (ex.InnerException != null)
                 {
@@ -492,6 +531,8 @@ namespace Project_Cellphoness.Controllers
         [HttpPost]
         public ActionResult ApDungVoucher(string maCode)
         {
+            var tk = Session["TaiKhoan"] as TaiKhoan;
+
             List<GioHang> lstGioHang = LayGioHang();
             if (lstGioHang == null || lstGioHang.Count == 0)
             {
@@ -514,11 +555,36 @@ namespace Project_Cellphoness.Controllers
                 return RedirectToAction("Index");
             }
 
-            if (voucher.SoLuong <= 0)
+            // ========================================================
+            // BIG UPDATE GIAI ĐOẠN 4: KIỂM TRA MÃ CÓ TRONG VÍ KHÔNG
+            // ========================================================
+            if (voucher.HienThiDoiThuong == true)
             {
-                TempData["LoiVoucher"] = "Mã giảm giá này đã được sử dụng hết!";
-                return RedirectToAction("Index");
+                if (tk == null)
+                {
+                    TempData["LoiVoucher"] = "Vui lòng đăng nhập để sử dụng mã ưu đãi từ Ví Voucher!";
+                    return RedirectToAction("Index");
+                }
+
+                // Kiểm tra khách hàng có mã này trong Ví và chưa sử dụng không
+                var vi = db.ViVoucher.FirstOrDefault(v => v.MaTK == tk.MaTK && v.MaVoucher == maCode && v.TrangThaiSD == false);
+                if (vi == null)
+                {
+                    TempData["LoiVoucher"] = "Bạn chưa đổi mã này hoặc mã đã được sử dụng!";
+                    return RedirectToAction("Index");
+                }
+                // Lưu ý: Không check SoLuong <= 0 ở đây vì số lượng đã bị trừ lúc khách bấm đổi điểm lấy mã rồi.
             }
+            else
+            {
+                // Nếu là mã đại trà (public) thì check xem kho mã còn không
+                if (voucher.SoLuong <= 0)
+                {
+                    TempData["LoiVoucher"] = "Mã giảm giá này đã được sử dụng hết!";
+                    return RedirectToAction("Index");
+                }
+            }
+            // ========================================================
 
             decimal tongTienHienTai = (decimal)lstGioHang.Sum(n => n.dThanhTien);
 

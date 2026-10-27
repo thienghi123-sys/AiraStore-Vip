@@ -3,7 +3,13 @@
 @{
     ViewBag.Title = "Giỏ hàng của bạn";
     Layout = "~/Views/Shared/_Layout.cshtml";
+
+    // Ép kiểu dữ liệu danh sách ví từ ViewBag truyền sang
+    var lstVi = ViewBag.DanhSachVi as IEnumerable<Project_Cellphoness.Models.MaGiamGia>;
 }
+
+<!-- THÊM THƯ VIỆN SWEETALERT2 ĐỂ LÀM POPUP ĐẸP -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <style>
     .cart-container {
@@ -39,7 +45,7 @@
     }
 
         .cart-img:hover {
-            transform: scale(1.05); /* Hiệu ứng phóng to nhẹ khi di chuột vào ảnh */
+            transform: scale(1.05);
         }
 
     .cart-info {
@@ -52,7 +58,6 @@
         margin-bottom: 5px;
     }
 
-        /* Hiệu ứng khi di chuột vào tên sản phẩm */
         .cart-name a {
             color: #333;
             text-decoration: none;
@@ -87,9 +92,8 @@
             background: #e0e0e0;
         }
 
-    /* ĐÃ BỔ SUNG: CSS cho nút So sánh */
     .btn-compare {
-        color: #007bff; /* Màu xanh nổi bật cho chức năng so sánh */
+        color: #007bff;
         margin-left: 10px;
         text-decoration: none;
         font-size: 18px;
@@ -105,6 +109,7 @@
         margin-left: 15px;
         text-decoration: none;
         font-size: 18px;
+        cursor: pointer;
     }
 
         .btn-delete:hover {
@@ -141,6 +146,132 @@
         .btn-checkout:hover {
             background: #b00012;
         }
+
+    /* CSS CHO MODAL CHỌN VOUCHER */
+    .btn-choose-voucher {
+        background: #fff3e0;
+        color: #e65100;
+        border: 1px solid #ffcc80;
+        padding: 8px 15px;
+        border-radius: 5px;
+        font-weight: bold;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+        margin-bottom: 10px;
+        transition: 0.2s;
+    }
+
+        .btn-choose-voucher:hover {
+            background: #ffe0b2;
+        }
+
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 999;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .modal-content {
+        background: #fff;
+        width: 90%;
+        max-width: 500px;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 10px;
+        margin-bottom: 15px;
+    }
+
+        .modal-header h3 {
+            margin: 0;
+            color: #333;
+        }
+
+    .btn-close {
+        background: none;
+        border: none;
+        font-size: 20px;
+        cursor: pointer;
+        color: #888;
+    }
+
+        .btn-close:hover {
+            color: red;
+        }
+
+    /* THẺ VOUCHER TRONG MODAL */
+    .vi-item {
+        display: flex;
+        border: 1px solid #eee;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        overflow: hidden;
+    }
+
+    .vi-left {
+        background: linear-gradient(135deg, #ff9a44, #fc6076);
+        color: white;
+        width: 90px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 10px;
+        font-weight: bold;
+        font-size: 18px;
+    }
+
+    .vi-right {
+        padding: 12px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .vi-code {
+        font-size: 16px;
+        font-weight: 900;
+        color: #333;
+        margin-bottom: 3px;
+    }
+
+    .vi-desc {
+        font-size: 13px;
+        color: #666;
+        margin-bottom: 8px;
+        line-height: 1.4;
+    }
+
+    .btn-apply-direct {
+        background: #28a745;
+        color: white;
+        border: none;
+        padding: 5px 15px;
+        border-radius: 4px;
+        font-weight: bold;
+        cursor: pointer;
+        font-size: 12px;
+        align-self: flex-start;
+    }
 </style>
 
 <div class="cart-container">
@@ -161,26 +292,20 @@
                 <a href="@Url.Action("Details", "Home", new { id = item.iMaSP })">
                     <img src="@item.sHinhAnh" class="cart-img" title="Nhấn để xem chi tiết" />
                 </a>
-
                 <div class="cart-info">
                     <div class="cart-name">
                         <a href="@Url.Action("Details", "Home", new { id = item.iMaSP })">@item.sTenSP</a>
                     </div>
                     <div class="cart-price">@String.Format("{0:0,0}", item.dDonGia).Replace(",", ".") đ</div>
                 </div>
-
                 <div class="cart-actions">
                     <a href="@Url.Action("GiamSoLuong", "GioHang", new { iMaSP = item.iMaSP })" class="btn-qty" style="text-decoration:none; color:#333;">-</a>
-
                     <span style="font-weight:bold; width: 20px; text-align:center;">@item.iSoLuong</span>
-
                     <a href="@Url.Action("TangSoLuong", "GioHang", new { iMaSP = item.iMaSP })" class="btn-qty" style="text-decoration:none; color:#333;">+</a>
+                    <a href="@Url.Action("SoSanh", "Home", new { id1 = item.iMaSP })" class="btn-compare" title="So sánh cấu hình máy này"><i class="fa-solid fa-code-compare"></i></a>
 
-                    <a href="@Url.Action("SoSanh", "Home", new { id1 = item.iMaSP })" class="btn-compare" title="So sánh cấu hình máy này">
-                        <i class="fa-solid fa-code-compare"></i>
-                    </a>
-
-                    <a href="@Url.Action("XoaGioHang", "GioHang", new { iMaSP = item.iMaSP })" class="btn-delete" title="Xóa khỏi giỏ" onclick="return confirm('Bạn có chắc chắn muốn bỏ @item.sTenSP khỏi giỏ hàng?');">
+                    <!-- NÚT XÓA BẰNG SWEETALERT2 -->
+                    <a href="javascript:void(0);" onclick="xacNhanXoa('@Url.Action("XoaGioHang", "GioHang", new { iMaSP = item.iMaSP })', '@item.sTenSP')" class="btn-delete" title="Xóa khỏi giỏ">
                         <i class="fa-solid fa-trash"></i>
                     </a>
                 </div>
@@ -188,27 +313,33 @@
         }
 
         <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-top: 20px; border: 1px dashed #ccc; text-align: left;">
-            <h4 style="margin-top: 0; color: #333; font-size: 16px;"><i class="fa-solid fa-ticket"></i> Mã giảm giá / Khuyến mãi</h4>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <h4 style="margin: 0; color: #333; font-size: 16px;"><i class="fa-solid fa-ticket"></i> Mã giảm giá / Khuyến mãi</h4>
+
+                <!-- NÚT MỞ POPUP CHỌN MÃ TỪ VÍ -->
+                @if (Session["Voucher"] == null)
+                {
+                    <button class="btn-choose-voucher" onclick="openVoucherModal()">
+                        <i class="fa-solid fa-wallet"></i> Chọn mã từ Ví của bạn
+                    </button>
+                }
+            </div>
 
             @if (TempData["LoiVoucher"] != null)
             {
-                <div style="color: #dc3545; margin-bottom: 10px; font-weight: bold; font-size: 14px;">
-                    <i class="fa-solid fa-triangle-exclamation"></i> @TempData["LoiVoucher"]
-                </div>
+                <div style="color: #dc3545; margin-bottom: 10px; font-weight: bold; font-size: 14px;"><i class="fa-solid fa-triangle-exclamation"></i> @TempData["LoiVoucher"]</div>
             }
             @if (TempData["ThongBaoVoucher"] != null)
             {
-                <div style="color: #28a745; margin-bottom: 10px; font-weight: bold; font-size: 14px;">
-                    <i class="fa-solid fa-circle-check"></i> @TempData["ThongBaoVoucher"]
-                </div>
+                <div style="color: #28a745; margin-bottom: 10px; font-weight: bold; font-size: 14px;"><i class="fa-solid fa-circle-check"></i> @TempData["ThongBaoVoucher"]</div>
             }
 
             @if (Session["Voucher"] == null)
             {
-                using (Html.BeginForm("ApDungVoucher", "GioHang", FormMethod.Post))
+                using (Html.BeginForm("ApDungVoucher", "GioHang", FormMethod.Post, new { id = "formApplyVoucher" }))
                 {
                     <div style="display: flex; gap: 10px;">
-                        <input type="text" name="maCode" placeholder="Nhập mã giảm giá..." required style="flex: 1; padding: 10px; border-radius: 5px; border: 1px solid #ccc; font-weight: bold; text-transform: uppercase; outline: none;" />
+                        <input type="text" id="inputVoucherCode" name="maCode" placeholder="Nhập mã giảm giá..." required style="flex: 1; padding: 10px; border-radius: 5px; border: 1px solid #ccc; font-weight: bold; text-transform: uppercase; outline: none;" />
                         <button type="submit" style="background: var(--red-cps); color: white; border: none; padding: 10px 20px; border-radius: 5px; font-weight: bold; cursor: pointer;">ÁP DỤNG</button>
                     </div>
                 }
@@ -222,44 +353,130 @@
                             <strong style="color: #2e7d32; font-size: 15px;"><i class="fa-solid fa-tag"></i> Đã áp dụng mã: @vc.MaVoucher</strong>
                             <div style="color: #555; font-size: 13px; margin-top: 5px;">Giảm @vc.PhanTramGiam% (Tối đa @String.Format("{0:0,0}", vc.GiaTriToiDa) đ)</div>
                         </div>
-                        <a href="@Url.Action("XoaVoucher", "GioHang")" style="color: #dc3545; text-decoration: none; font-weight: bold; font-size: 14px;">
-                            <i class="fa-solid fa-trash-can"></i> Hủy mã
-                        </a>
+                        <a href="@Url.Action("XoaVoucher", "GioHang")" style="color: #dc3545; text-decoration: none; font-weight: bold; font-size: 14px;"><i class="fa-solid fa-trash-can"></i> Hủy mã</a>
                     </div>
                 </div>
             }
         </div>
+
         <div class="cart-total-box">
-            <div style="margin-bottom: 10px; font-size: 16px; color: #555;">
-                Tạm tính: <strong>@String.Format("{0:0,0}", ViewBag.TongTien).Replace(",", ".") đ</strong>
-            </div>
+            <div style="margin-bottom: 10px; font-size: 16px; color: #555;">Tạm tính: <strong>@String.Format("{0:0,0}", ViewBag.TongTien).Replace(",", ".") đ</strong></div>
 
             @if (Session["TienGiam"] != null)
             {
-                <div style="margin-bottom: 10px; font-size: 16px; color: #28a745;">
-                    Khuyến mãi: <strong>- @String.Format("{0:0,0}", Session["TienGiam"]).Replace(",", ".") đ</strong>
-                </div>
-
+                <div style="margin-bottom: 10px; font-size: 16px; color: #28a745;">Khuyến mãi: <strong>- @String.Format("{0:0,0}", Session["TienGiam"]).Replace(",", ".") đ</strong></div>
                 var thanhTien = ViewBag.TongTien - (decimal)Session["TienGiam"];
-                <div style="margin-bottom: 15px; font-size: 18px;">
-                    Tổng thanh toán: <span class="total-price">@String.Format("{0:0,0}", thanhTien).Replace(",", ".") đ</span>
-                </div>
+                <div style="margin-bottom: 15px; font-size: 18px;">Tổng thanh toán: <span class="total-price">@String.Format("{0:0,0}", thanhTien).Replace(",", ".") đ</span></div>
             }
             else
             {
-                <div style="margin-bottom: 15px; font-size: 18px;">
-                    Tổng thanh toán: <span class="total-price">@String.Format("{0:0,0}", ViewBag.TongTien).Replace(",", ".") đ</span>
-                </div>
+                <div style="margin-bottom: 15px; font-size: 18px;">Tổng thanh toán: <span class="total-price">@String.Format("{0:0,0}", ViewBag.TongTien).Replace(",", ".") đ</span></div>
             }
-
             <a href="@Url.Action("DatHang", "GioHang")" class="btn-checkout" style="text-decoration:none; display:inline-block; text-align:center; box-sizing:border-box;">TIẾN HÀNH ĐẶT HÀNG</a>
         </div>
     }
 </div>
 
+<!-- ========================================== -->
+<!-- MODAL HIỂN THỊ DANH SÁCH VÍ VOUCHER -->
+<!-- ========================================== -->
+<div id="voucherModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3><i class="fa-solid fa-wallet" style="color: #e65100;"></i> Voucher của bạn</h3>
+            <button class="btn-close" onclick="closeVoucherModal()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="modal-body">
+            @if (lstVi != null && lstVi.Any())
+            {
+                foreach (var item in lstVi)
+                {
+                    <div class="vi-item">
+                        <div class="vi-left">
+                            <span>@item.PhanTramGiam%</span>
+                        </div>
+                        <div class="vi-right">
+                            <div class="vi-code">@item.MaVoucher</div>
+                            <div class="vi-desc">
+                                @(item.GiaTriToiDa != null ? "Giảm tối đa " + String.Format("{0:0,0}", item.GiaTriToiDa).Replace(",", ".") + "đ. " : "")
+                                @(item.DonToiThieu != null ? "Cho đơn từ " + String.Format("{0:0,0}", item.DonToiThieu).Replace(",", ".") + "đ." : "")
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-size: 11px; color: #999;"><i class="fa-regular fa-clock"></i> HSD: @item.NgayKetThuc.ToString("dd/MM/yyyy HH:mm")</span>
+                                <!-- Bấm nút này sẽ gọi JS điền mã và submit Form ngay lập tức -->
+                                <button type="button" class="btn-apply-direct" onclick="autoApplyVoucher('@item.MaVoucher')">Dùng ngay</button>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div style="text-align: center; padding: 20px; color: #888;">
+                    <i class="fa-solid fa-box-open" style="font-size: 40px; margin-bottom: 10px; color: #ccc;"></i>
+                    <p>Ví Voucher của bạn đang trống!</p>
+                    <a href="@Url.Action("Index", "DoiThuong")" style="color: var(--red-cps); text-decoration: underline;">Đổi mã ngay</a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<script>
+    // Hàm gọi SweetAlert2 để xác nhận xóa sản phẩm
+    function xacNhanXoa(url, tenSP) {
+        Swal.fire({
+            title: 'Xóa sản phẩm?',
+            html: "Bạn có chắc chắn muốn bỏ <b>" + tenSP + "</b> khỏi giỏ hàng?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#D70018',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Đồng ý xóa',
+            cancelButtonText: 'Hủy giữ lại',
+            reverseButtons: true // Đảo vị trí 2 nút
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Nếu khách chọn "Đồng ý", chuyển hướng đến đường link xóa
+                window.location.href = url;
+            }
+        });
+    }
+
+    // Hàm mở Modal Voucher
+    function openVoucherModal() {
+        document.getElementById('voucherModal').style.display = 'flex';
+    }
+
+    // Hàm đóng Modal Voucher
+    function closeVoucherModal() {
+        document.getElementById('voucherModal').style.display = 'none';
+    }
+
+    // Đóng modal khi click ra ngoài vùng trắng
+    window.onclick = function (event) {
+        var modal = document.getElementById('voucherModal');
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+
+    // Hàm tự động điền mã và submit Form
+    function autoApplyVoucher(code) {
+        document.getElementById('inputVoucherCode').value = code;
+        document.getElementById('formApplyVoucher').submit();
+    }
+</script>
+
 @if (TempData["LoiTonKho"] != null)
 {
     <script>
-        alert('@Html.Raw(TempData["LoiTonKho"])');
+        // Hiển thị thông báo hết hàng bằng SweetAlert2
+        Swal.fire({
+            title: 'Hết hàng!',
+            text: '@Html.Raw(TempData["LoiTonKho"])',
+            icon: 'error',
+            confirmButtonColor: '#D70018'
+        });
     </script>
 }

@@ -1,4 +1,7 @@
-﻿using System.Linq;
+﻿using System;
+using System.IO;
+using System.Linq;
+using System.Web;
 using System.Web.Mvc;
 using Project_Cellphoness.Models;
 
@@ -21,10 +24,29 @@ namespace Project_Cellphoness.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        public ActionResult Create(HangSanXuat hang)
+        public ActionResult Create(HangSanXuat hang, HttpPostedFileBase fileUpload)
         {
             if (ModelState.IsValid)
             {
+                // XỬ LÝ UPLOAD ẢNH LOGO
+                if (fileUpload != null && fileUpload.ContentLength > 0)
+                {
+                    var fileName = Path.GetFileName(fileUpload.FileName);
+                    var directoryPath = Server.MapPath("~/Content/images/");
+
+                    // KIỂM TRA VÀ TỰ ĐỘNG TẠO THƯ MỤC NẾU CHƯA CÓ
+                    if (!Directory.Exists(directoryPath))
+                    {
+                        Directory.CreateDirectory(directoryPath);
+                    }
+
+                    var path = Path.Combine(directoryPath, fileName);
+                    fileUpload.SaveAs(path);
+
+                    hang.Logo = "~/Content/images/" + fileName;
+                }
+
+                // LƯU VÀO DATABASE
                 db.HangSanXuat.Add(hang);
                 db.SaveChanges();
                 return RedirectToAction("Index");
@@ -41,16 +63,36 @@ namespace Project_Cellphoness.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        public ActionResult Edit(HangSanXuat hang)
+        public ActionResult Edit(HangSanXuat hang, HttpPostedFileBase fileUpload)
         {
             if (ModelState.IsValid)
             {
+                // XỬ LÝ UPLOAD ẢNH LOGO
+                if (fileUpload != null && fileUpload.ContentLength > 0)
+                {
+                    var fileName = Path.GetFileName(fileUpload.FileName);
+                    var directoryPath = Server.MapPath("~/Content/images/");
+
+                    // KIỂM TRA VÀ TỰ ĐỘNG TẠO THƯ MỤC NẾU CHƯA CÓ
+                    if (!Directory.Exists(directoryPath))
+                    {
+                        Directory.CreateDirectory(directoryPath);
+                    }
+
+                    var path = Path.Combine(directoryPath, fileName);
+                    fileUpload.SaveAs(path);
+
+                    hang.Logo = "~/Content/images/" + fileName;
+                }
+
+                // CẬP NHẬT DATABASE
                 db.Entry(hang).State = System.Data.Entity.EntityState.Modified;
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
             return View(hang);
         }
+
         public ActionResult Delete(int id)
         {
             var hang = db.HangSanXuat.SingleOrDefault(h => h.MaHang == id);

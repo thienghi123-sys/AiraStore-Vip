@@ -7,6 +7,9 @@
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
+    <!-- THƯ VIỆN LORDICON SIÊU MƯỢT (Gọi trực tiếp, không cần Node.js) -->
+    <script src="https://cdn.lordicon.com/lordicon.js"></script>
+
     <style>
         :root {
             --red-cps: #D70018; /* Màu đỏ đặc trưng */
@@ -63,9 +66,9 @@
             top: 130%;
             left: 0;
             background-color: #fff;
-            min-width: 220px;
-            box-shadow: 0px 8px 20px rgba(0,0,0,0.15);
-            border-radius: 8px;
+            min-width: 240px;
+            box-shadow: 0px 8px 25px rgba(0,0,0,0.18);
+            border-radius: 10px;
             padding: 10px 0;
             z-index: 1001;
             opacity: 0;
@@ -74,15 +77,15 @@
             transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        .dropdown-menu-content::before {
-            content: "";
-            position: absolute;
-            top: -8px;
-            left: 20px;
-            border-width: 0 8px 8px 8px;
-            border-style: solid;
-            border-color: transparent transparent #fff transparent;
-        }
+            .dropdown-menu-content::before {
+                content: "";
+                position: absolute;
+                top: -8px;
+                left: 20px;
+                border-width: 0 8px 8px 8px;
+                border-style: solid;
+                border-color: transparent transparent #fff transparent;
+            }
 
         .header-dropdown:hover .dropdown-menu-content {
             opacity: 1;
@@ -93,28 +96,70 @@
 
         .dropdown-item {
             color: var(--text-dark);
-            padding: 10px 20px;
+            padding: 10px 18px;
             text-decoration: none;
             display: flex;
             align-items: center;
             gap: 12px;
             font-size: 14px;
-            transition: background 0.2s;
-            font-weight: 500;
+            transition: all 0.2s ease;
+            font-weight: 600;
         }
 
-        .dropdown-item:hover {
-            background-color: #fce8eb;
-            color: var(--red-cps);
+            .dropdown-item:hover {
+                background-color: #fce8eb;
+                color: var(--red-cps);
+                padding-left: 23px;
+            }
+
+            .dropdown-item i {
+                width: 20px;
+                text-align: center;
+                font-size: 17px;
+                color: #555;
+                transition: transform 0.2s ease;
+            }
+
+            .dropdown-item:hover i {
+                color: var(--red-cps);
+                transform: scale(1.15);
+            }
+
+        /* Mục Mini Game màu vàng nổi bật trong Dropdown */
+        @@keyframes wiggleGameIcon {
+            0%, 100% {
+                transform: rotate(0deg);
+            }
+
+            25% {
+                transform: rotate(-12deg) scale(1.1);
+            }
+
+            75% {
+                transform: rotate(12deg) scale(1.1);
+            }
         }
 
-        .dropdown-item i {
-            width: 20px;
-            text-align: center;
-            font-size: 18px;
-            color: #555;
+        .dropdown-item-game {
+            background: linear-gradient(135deg, #FFD700, #FF8C00) !important;
+            color: #fff !important;
+            font-weight: 800 !important;
+            margin: 5px 10px;
+            border-radius: 8px;
+            padding: 10px 14px !important;
+            box-shadow: 0 3px 10px rgba(255, 140, 0, 0.35);
         }
-        .dropdown-item:hover i { color: var(--red-cps); }
+
+            .dropdown-item-game i {
+                color: #fff !important;
+                animation: wiggleGameIcon 1.5s infinite ease-in-out;
+            }
+
+            .dropdown-item-game:hover {
+                background: linear-gradient(135deg, #FFC300, #FF6B00) !important;
+                color: #fff !important;
+                transform: scale(1.03);
+            }
 
         .btn-category {
             background-color: rgba(255,255,255,0.2);
@@ -129,16 +174,19 @@
             cursor: pointer;
             transition: 0.3s;
         }
-        .btn-category:hover { background-color: rgba(255,255,255,0.3); }
+
+            .btn-category:hover {
+                background-color: rgba(255,255,255,0.3);
+            }
 
         /* ======================================================== */
-        /* CSS MỚI CHO THANH TÌM KIẾM & DROPDOWN GỢI Ý (AUTO-SUGGEST) */
+        /* CSS CHO THANH TÌM KIẾM & DROPDOWN GỢI Ý (AUTO-SUGGEST) */
         /* ======================================================== */
         .search-container {
             position: relative;
             flex: 1;
-            max-width: 450px;
-            margin: 0 20px;
+            max-width: 430px;
+            margin: 0 15px;
         }
 
         .search-box {
@@ -152,21 +200,23 @@
             box-sizing: border-box;
         }
 
-        .search-box input {
-            border: none;
-            outline: none;
-            width: 100%;
-            padding: 5px;
-            font-size: 14px;
-        }
+            .search-box input {
+                border: none;
+                outline: none;
+                width: 100%;
+                padding: 5px;
+                font-size: 14px;
+            }
 
-        .search-box button {
-            background: none;
-            border: none;
-            color: var(--text-dark);
-            cursor: pointer;
-            font-size: 16px;
-        }
+            .search-box button {
+                background: none;
+                border: none;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 0 5px;
+            }
 
         .search-suggest-box {
             position: absolute;
@@ -202,13 +252,13 @@
             transition: 0.2s;
         }
 
-        .suggest-item:hover {
-            background-color: #fce8eb;
-        }
+            .suggest-item:hover {
+                background-color: #fce8eb;
+            }
 
-        .suggest-item:last-child {
-            border-bottom: none;
-        }
+            .suggest-item:last-child {
+                border-bottom: none;
+            }
 
         .suggest-img {
             width: 45px;
@@ -236,7 +286,7 @@
 
         .header-items {
             display: flex;
-            gap: 15px;
+            gap: 12px;
             align-items: center;
         }
 
@@ -252,64 +302,281 @@
             padding: 5px 10px;
         }
 
-        .header-btn i {
-            font-size: 20px;
-            margin-bottom: 3px;
-        }
+            .header-btn i {
+                font-size: 20px;
+                margin-bottom: 3px;
+            }
 
-        .header-btn:hover {
-            background-color: rgba(255,255,255,0.2);
-            border-radius: 8px;
-        }
+            .header-btn:hover {
+                background-color: rgba(255,255,255,0.2);
+                border-radius: 8px;
+            }
 
         .user-dropdown .dropdown-menu-content {
             left: auto;
             right: 0;
-            min-width: 200px;
-        }
-        .user-dropdown .dropdown-menu-content::before {
-            left: auto;
-            right: 30px;
+            min-width: 240px;
         }
 
-        .cart-wrapper { position: relative; }
+            .user-dropdown .dropdown-menu-content::before {
+                left: auto;
+                right: 25px;
+            }
+
+        .cart-wrapper {
+            position: relative;
+        }
+
         .cart-badge {
-            position: absolute; top: -5px; right: 5px; background: #FFB800;
-            color: var(--text-dark); padding: 2px 6px; border-radius: 50%; font-size: 11px; font-weight: bold;
+            position: absolute;
+            top: -5px;
+            right: 5px;
+            background: #FFB800;
+            color: var(--text-dark);
+            padding: 2px 6px;
+            border-radius: 50%;
+            font-size: 11px;
+            font-weight: bold;
+            z-index: 10;
         }
-        .main-content { max-width: 1200px; margin: 20px auto; padding: 0 10px; min-height: 70vh; }
-        .cps-footer { background-color: #f8f9fa; padding: 40px 0 20px 0; border-top: 1px solid #eee; margin-top: 50px; }
-        .cps-container { max-width: 1200px; margin: 0 auto; padding: 0 15px; display: flex; flex-wrap: wrap; gap: 20px; justify-content: space-between; }
-        .cps-col { flex: 1; min-width: 250px; }
-        .cps-col h4 { font-size: 16px; color: #333; margin-bottom: 15px; font-weight: bold; }
-        .cps-col p, .cps-col a { font-size: 13px; color: #444; text-decoration: none; margin-bottom: 10px; display: block; line-height: 1.5; }
-        .cps-col a:hover { color: var(--red-cps); }
-        .cps-newsletter { background: #fdf5f5; padding: 15px; border-radius: 8px; margin-top: 15px; }
-        .cps-newsletter input { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
-        .cps-social-icons i { font-size: 24px; margin-right: 10px; color: #555; transition: 0.3s; }
-        .cps-social-icons i.fa-youtube:hover { color: #ff0000; }
-        .cps-social-icons i.fa-facebook:hover { color: #1877f2; }
-        .cps-partner-badge { display: inline-block; background: #D70018; color: white; padding: 5px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 10px; font-size: 14px; }
 
-        /* Widget Chat & Nút nổi */
-        .chat-widget-container { position: fixed; bottom: 30px; right: 30px; display: flex; flex-direction: column; gap: 15px; z-index: 9999; }
-        .chat-btn { width: 55px; height: 55px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: transform 0.3s; text-decoration: none; border: none; cursor: pointer; }
-        .chat-btn:hover { transform: scale(1.15); }
-        .scroll-top-btn { background-color: #333; color: white; font-size: 20px; display: none; }
-        keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(0, 104, 255, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(0, 104, 255, 0); } 100% { box-shadow: 0 0 0 0 rgba(0, 104, 255, 0); } }
-        .zalo-btn { background-color: #0068ff; animation: pulse 2s infinite; }
-        .mess-btn { background: linear-gradient(45deg, #00B2FF, #006AFF); color: white; font-size: 28px; }
+        .main-content {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 10px;
+            min-height: 70vh;
+        }
 
-        /* ======================================================== */
-        /* CSS MỚI CHO TRỢ LÝ AI */
-        /* ======================================================== */
-        .ai-btn {
-            background: linear-gradient(45deg, #ff416c, #ff4b2b);
+        .cps-footer {
+            background-color: #f8f9fa;
+            padding: 40px 0 20px 0;
+            border-top: 1px solid #eee;
+            margin-top: 50px;
+        }
+
+        .cps-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: space-between;
+        }
+
+        .cps-col {
+            flex: 1;
+            min-width: 250px;
+        }
+
+            .cps-col h4 {
+                font-size: 16px;
+                color: #333;
+                margin-bottom: 15px;
+                font-weight: bold;
+            }
+
+            .cps-col p, .cps-col a {
+                font-size: 13px;
+                color: #444;
+                text-decoration: none;
+                margin-bottom: 10px;
+                display: block;
+                line-height: 1.5;
+            }
+
+                .cps-col a:hover {
+                    color: var(--red-cps);
+                }
+
+        .cps-social-icons i {
+            font-size: 24px;
+            margin-right: 10px;
+            color: #555;
+            transition: 0.3s;
+        }
+
+            .cps-social-icons i.fa-youtube:hover {
+                color: #ff0000;
+            }
+
+            .cps-social-icons i.fa-facebook:hover {
+                color: #1877f2;
+            }
+
+        .cps-partner-badge {
+            display: inline-block;
+            background: #D70018;
             color: white;
-            font-size: 26px;
-            box-shadow: 0 0 15px rgba(255, 75, 43, 0.5);
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 14px;
         }
 
+        /* ======================================================== */
+        /* WIDGET CHAT & HIỆU ỨNG TỎA SÓNG ĐỒNG BỘ */
+        /* ======================================================== */
+        .chat-widget-container {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 9999;
+            align-items: center;
+        }
+
+        .chat-btn {
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: transform 0.3s;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+        }
+
+            .chat-btn:hover {
+                transform: scale(1.15);
+            }
+
+        .scroll-top-btn {
+            background-color: #333;
+            color: white;
+            font-size: 20px;
+            display: none;
+        }
+
+        /* Tỏa sóng màu xanh cho Zalo & Messenger */
+        @@keyframes pulseBlue {
+            0% {
+                box-shadow: 0 0 0 0 rgba(0, 104, 255, 0.7);
+            }
+
+            70% {
+                box-shadow: 0 0 0 15px rgba(0, 104, 255, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(0, 104, 255, 0);
+            }
+        }
+
+        /* Tỏa sóng màu đỏ cho nút AI AiraStore */
+        @@keyframes pulseRed {
+            0% {
+                box-shadow: 0 0 0 0 rgba(215, 0, 24, 0.7);
+            }
+
+            70% {
+                box-shadow: 0 0 0 15px rgba(215, 0, 24, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(215, 0, 24, 0);
+            }
+        }
+
+        .zalo-btn {
+            background-color: #0068ff;
+            animation: pulseBlue 2s infinite;
+        }
+
+        .mess-btn {
+            background: linear-gradient(45deg, #00B2FF, #006AFF);
+            color: white;
+            font-size: 28px;
+            animation: pulseBlue 2s infinite;
+        }
+
+        /* ======================================================== */
+        /* NÚT AI LOGO SHOP & POPUP TOOLTIP 24/7 */
+        /* ======================================================== */
+        .ai-widget-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .ai-btn {
+            background: #fff;
+            border: 2px solid var(--red-cps);
+            animation: pulseRed 2s infinite;
+            overflow: hidden;
+        }
+
+            .ai-btn img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                border-radius: 50%;
+            }
+
+        /* Popup nhỏ: "Giải đáp mọi thắc mắc 24/7 ở đây" */
+        .ai-tooltip-popup {
+            position: absolute;
+            right: 70px;
+            background: #fff;
+            color: var(--red-cps);
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+            white-space: nowrap;
+            box-shadow: 0 4px 15px rgba(215, 0, 24, 0.2);
+            border: 1.5px solid var(--red-cps);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            animation: floatTooltip 2.5s ease-in-out infinite;
+            transition: all 0.2s ease;
+        }
+
+            .ai-tooltip-popup:hover {
+                background: var(--red-cps);
+                color: #fff;
+            }
+
+            .ai-tooltip-popup::after {
+                content: "";
+                position: absolute;
+                right: -7px;
+                top: 50%;
+                transform: translateY(-50%) rotate(45deg);
+                width: 10px;
+                height: 10px;
+                background: #fff;
+                border-top: 1.5px solid var(--red-cps);
+                border-right: 1.5px solid var(--red-cps);
+                transition: background 0.2s ease;
+            }
+
+            .ai-tooltip-popup:hover::after {
+                background: var(--red-cps);
+            }
+
+        @@keyframes floatTooltip {
+            0%, 100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-4px);
+            }
+        }
+
+        /* ======================================================== */
+        /* KHUNG HỘP THOẠI CHAT AI */
+        /* ======================================================== */
         .ai-chat-box {
             position: fixed;
             bottom: 100px;
@@ -327,23 +594,37 @@
             animation: scaleUp 0.3s ease-out forwards;
         }
 
-        keyframes scaleUp {
-            from { opacity: 0; transform: scale(0.5); }
-            to { opacity: 1; transform: scale(1); }
+        @@keyframes scaleUp {
+            0% {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
         }
 
         .ai-chat-header {
-            background: linear-gradient(45deg, #ff416c, #ff4b2b);
+            background: linear-gradient(45deg, #D70018, #ff4b2b);
             color: #fff;
-            padding: 15px;
+            padding: 12px 15px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             font-weight: bold;
         }
 
-        .ai-chat-close { cursor: pointer; font-size: 18px; transition: 0.2s; }
-        .ai-chat-close:hover { transform: rotate(90deg); }
+        .ai-chat-close {
+            cursor: pointer;
+            font-size: 18px;
+            transition: 0.2s;
+        }
+
+            .ai-chat-close:hover {
+                transform: rotate(90deg);
+            }
 
         .ai-chat-body {
             padding: 15px;
@@ -378,6 +659,51 @@
             border-bottom-left-radius: 2px;
         }
 
+        .ai-product-card {
+            display: flex;
+            align-items: center;
+            background: #fff;
+            border: 1px solid #ffcccc;
+            border-radius: 10px;
+            padding: 10px;
+            margin-top: 5px;
+            text-decoration: none;
+            color: #333;
+            box-shadow: 0 2px 5px rgba(215, 0, 24, 0.1);
+            transition: 0.2s;
+        }
+
+            .ai-product-card:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(215, 0, 24, 0.2);
+                border-color: var(--red-cps);
+            }
+
+        .ai-product-img {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+            margin-right: 10px;
+        }
+
+        .ai-product-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .ai-product-name {
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 3px;
+        }
+
+        .ai-product-price {
+            font-size: 13px;
+            color: var(--red-cps);
+            font-weight: 800;
+        }
+
         .ai-chat-footer {
             padding: 12px;
             border-top: 1px solid #eaeaea;
@@ -386,26 +712,270 @@
             background: #fff;
         }
 
-        .ai-chat-footer input {
-            flex: 1;
-            padding: 12px 15px;
-            border: 1px solid #ddd;
-            border-radius: 25px;
-            outline: none;
-            font-size: 14px;
-            transition: 0.3s;
-        }
-        .ai-chat-footer input:focus { border-color: #ff4b2b; }
+            .ai-chat-footer input {
+                flex: 1;
+                padding: 12px 15px;
+                border: 1px solid #ddd;
+                border-radius: 25px;
+                outline: none;
+                font-size: 14px;
+                transition: 0.3s;
+            }
 
-        .ai-chat-footer button {
-            background: none;
-            border: none;
-            color: #ff4b2b;
+                .ai-chat-footer input:focus {
+                    border-color: #ff4b2b;
+                }
+
+            .ai-chat-footer button {
+                background: none;
+                border: none;
+                color: #ff4b2b;
+                font-size: 22px;
+                cursor: pointer;
+                transition: 0.2s;
+            }
+
+                .ai-chat-footer button:hover {
+                    transform: scale(1.1);
+                }
+
+        /* ======================================================== */
+        /* CSS NÚT NỔI & POPUP ĐIỂM DANH TÍCH LŨY 7 NGÀY LIÊN TỤC */
+        /* ======================================================== */
+        .floating-checkin-wrapper {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            z-index: 9998;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .floating-checkin-btn {
+            background: linear-gradient(135deg, #D70018, #ff6a00);
+            color: #fff;
+            border: 2.5px solid #FFD700;
+            border-radius: 35px;
+            padding: 10px 18px;
+            font-weight: 800;
+            font-size: 13.5px;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(215, 0, 24, 0.35);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s;
+            animation: pulseCheckinBtn 2s infinite;
+        }
+
+            .floating-checkin-btn:hover {
+                transform: scale(1.08);
+            }
+
+            .floating-checkin-btn i {
+                font-size: 20px;
+                color: #FFD700;
+            }
+
+        @@keyframes pulseCheckinBtn {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 184, 0, 0.7);
+            }
+
+            70% {
+                box-shadow: 0 0 0 14px rgba(255, 184, 0, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 184, 0, 0);
+            }
+        }
+
+        /* Nhãn đỏ "Hãy thử ngay" kèm bàn tay chỉ ở góc dưới */
+        .floating-hand-prompt {
+            background: #fff;
+            color: #D70018;
+            border: 1.5px solid #D70018;
+            padding: 7px 13px;
+            border-radius: 20px;
+            font-size: 12.5px;
+            font-weight: 900;
+            text-decoration: none;
+            box-shadow: 0 4px 12px rgba(215,0,24,0.2);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            animation: bounceHandLeft 1.1s infinite ease-in-out;
+        }
+
+            .floating-hand-prompt:hover {
+                background: #D70018;
+                color: #fff;
+            }
+
+        @@keyframes bounceHandLeft {
+            0%, 100% {
+                transform: translateX(0);
+            }
+
+            50% {
+                transform: translateX(-6px);
+            }
+        }
+
+        /* Khung Modal Điểm danh 7 ngày */
+        .checkin-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.65);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 20000;
+            backdrop-filter: blur(4px);
+        }
+
+        .checkin-modal-card {
+            background: #fff;
+            width: 540px;
+            max-width: 94%;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            animation: checkinZoomIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @@keyframes checkinZoomIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.6) translateY(30px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .checkin-header {
+            background: linear-gradient(135deg, #D70018, #ff512f);
+            color: #fff;
+            padding: 22px 25px;
+            position: relative;
+            text-align: center;
+        }
+
+            .checkin-header h3 {
+                margin: 0 0 6px 0;
+                font-size: 22px;
+                font-weight: 900;
+                text-transform: uppercase;
+            }
+
+            .checkin-header p {
+                margin: 0;
+                font-size: 13px;
+                opacity: 0.92;
+            }
+
+        .checkin-close {
+            position: absolute;
+            top: 15px;
+            right: 18px;
             font-size: 22px;
             cursor: pointer;
+            color: #fff;
             transition: 0.2s;
         }
-        .ai-chat-footer button:hover { transform: scale(1.1); }
+
+            .checkin-close:hover {
+                transform: rotate(90deg);
+            }
+
+        .checkin-body {
+            padding: 25px;
+            text-align: center;
+        }
+
+        .streak-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .streak-day-box {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 12px 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            position: relative;
+            transition: 0.25s;
+        }
+
+            .streak-day-box.day-sunday {
+                grid-column: span 2;
+                background: linear-gradient(135deg, #fff8e1, #ffecb3);
+                border-color: #ffc107;
+            }
+
+            .streak-day-box.claimed {
+                background: #fce8eb;
+                border-color: #D70018;
+                color: #D70018;
+            }
+
+            .streak-day-box.today-target {
+                border-color: #ff9800;
+                background: #fff3e0;
+                transform: scale(1.05);
+                box-shadow: 0 4px 12px rgba(255, 152, 0, 0.25);
+            }
+
+        .day-label {
+            font-size: 12.5px;
+            font-weight: 800;
+            color: #444;
+        }
+
+        .day-pts {
+            font-size: 15px;
+            font-weight: 900;
+            color: #D70018;
+        }
+
+        .btn-claim-checkin {
+            background: linear-gradient(135deg, #D70018, #ff4b2b);
+            color: #fff;
+            border: none;
+            padding: 14px 40px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: 900;
+            cursor: pointer;
+            box-shadow: 0 6px 18px rgba(215, 0, 24, 0.35);
+            transition: 0.3s;
+            width: 100%;
+        }
+
+            .btn-claim-checkin:hover {
+                transform: translateY(-2px);
+            }
+
+            .btn-claim-checkin:disabled {
+                background: #adb5bd;
+                box-shadow: none;
+                cursor: not-allowed;
+            }
     </style>
 </head>
 <body>
@@ -431,13 +1001,17 @@
             <div class="search-container">
                 <form action="@Url.Action("TimKiem", "Home")" method="get" class="search-box">
                     <input type="text" name="tuKhoa" id="txtSearchMain" placeholder="Bạn cần tìm gì hôm nay?" autocomplete="off" required oninput="goiYTimKiemSmart()" />
-                    <button type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
+                    <button type="submit">
+                        <lord-icon src="https://cdn.lordicon.com/fkdzyfle.json"
+                                   trigger="hover"
+                                   colors="primary:#333333"
+                                   style="width:24px;height:24px">
+                        </lord-icon>
+                    </button>
                 </form>
 
-                <!-- Hộp Dropdown Gợi Ý Sẽ Hiện Lên Ở Đây -->
-                <div id="search-suggest-box" class="search-suggest-box">
-                    <!-- Javascript sẽ nhồi dữ liệu vào đây -->
-                </div>
+                <!-- Hộp Dropdown Gợi Ý -->
+                <div id="search-suggest-box" class="search-suggest-box"></div>
             </div>
 
             <div class="header-items">
@@ -446,9 +1020,27 @@
                     <span>Tin tức</span>
                 </a>
 
-                <a href="@Url.Action("Index", "YeuThich")" class="header-btn">
+                <!-- NÚT YÊU THÍCH KÈM BADGE HIỂN THỊ SỐ LƯỢNG GIỐNG GIỎ HÀNG -->
+                @{
+                    int soLuongYeuThich = 0;
+                    var tkYeuThich = Session["TaiKhoan"] as Project_Cellphoness.Models.TaiKhoan;
+                    string tenCookieYT = tkYeuThich != null ? "YeuThichCookie_" + tkYeuThich.MaTK : "YeuThichCookie";
+                    var cookieYTHeader = Request.Cookies[tenCookieYT] ?? Request.Cookies["YeuThichCookie"];
+
+                    if (cookieYTHeader != null && !string.IsNullOrEmpty(cookieYTHeader.Value))
+                    {
+                        var dsIdTim = cookieYTHeader.Value
+                            .Split(new char[] { ',', '-' }, StringSplitOptions.RemoveEmptyEntries)
+                            .Distinct()
+                            .ToList();
+                        soLuongYeuThich = dsIdTim.Count;
+                    }
+                }
+
+                <a href="@Url.Action("Index", "YeuThich")" class="header-btn cart-wrapper">
                     <i class="fa-solid fa-heart"></i>
                     <span>Yêu thích</span>
+                    <span class="cart-badge" id="wishlistBadgeCount">@soLuongYeuThich</span>
                 </a>
 
                 @Html.Action("GioHangPartial", "GioHang")
@@ -466,21 +1058,55 @@
                 }
                 else
                 {
+                    // Truy vấn ngầm qua CSDL để lấy thông tin Avatar mới nhất tránh lệch Session cũ
+                    {
+                        Project_Cellphoness.Models.CellphonesStoreEntities1 dbLayout = new Project_Cellphoness.Models.CellphonesStoreEntities1();
+                        var freshUser = dbLayout.TaiKhoan.Find(taiKhoan.MaTK);
+                        if (freshUser != null) { taiKhoan = freshUser; }
+                    }
+
                     <div class="header-dropdown user-dropdown">
-                        <div class="header-btn" style="padding-top: 2px;">
-                            <i class="fa-solid fa-circle-user" style="font-size: 22px;"></i>
+                        <!-- KHUNG NÚT HEADER CÓ HIỂN THỊ AVATAR TRÒN -->
+                        <div class="header-btn" style="padding-top: 2px; display: flex; align-items: center; gap: 6px;">
+                            @if (!string.IsNullOrEmpty(taiKhoan.Avatar))
+                            {
+                                <img src="@Url.Content(taiKhoan.Avatar)" alt="Avatar" style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover; border: 1.5px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.2);" />
+                            }
+                            else
+                            {
+                                <i class="fa-solid fa-circle-user" style="font-size: 22px;"></i>
+                            }
                             <span style="font-weight: bold;">
-                                @taiKhoan.HoTen.Split(' ').Last() <i class="fa-solid fa-chevron-down" style="font-size: 10px; margin-left: 3px;"></i>
+                                @taiKhoan.HoTen.Split(' ').Last() <i class="fa-solid fa-chevron-down" style="font-size: 10px; margin-left: 2px;"></i>
                             </span>
                         </div>
 
+                        <!-- MENU XỔ XUỐNG ĐỒNG BỘ ĐẦY ĐỦ CÁC TÍNH NĂNG -->
                         <div class="dropdown-menu-content">
                             <a href="@Url.Action("ThongTinCaNhan", "TaiKhoan")" class="dropdown-item">
                                 <i class="fa-regular fa-id-card"></i> Hồ sơ của tôi
                             </a>
                             <a href="@Url.Action("LichSuDonHang", "TaiKhoan")" class="dropdown-item">
-                                <i class="fa-solid fa-box-open"></i> Lịch sử đơn hàng
+                                <i class="fa-solid fa-clipboard-list"></i> Đơn mua của tôi
                             </a>
+                            <a href="@Url.Action("ViVoucher", "DoiThuong")" class="dropdown-item">
+                                <i class="fa-solid fa-ticket"></i> Ví Voucher của tôi
+                            </a>
+                            <a href="@Url.Action("Index", "DoiThuong")" class="dropdown-item">
+                                <i class="fa-solid fa-gift"></i> Đổi thêm Voucher
+                            </a>
+
+                            <!-- NÚT MINI GAME MÀU VÀNG NỔI BẬT DƯỚI MỤC ĐỔI VOUCHER -->
+                            <a href="@Url.Action("MiniGame", "TaiKhoan")" class="dropdown-item dropdown-item-game">
+                                <i class="fa-solid fa-gamepad"></i> Mini Game X2 Điểm
+                                <span style="margin-left:auto; background:#D70018; color:#fff; font-size:10px; padding:2px 6px; border-radius:8px; font-weight:900;">HOT</span>
+                            </a>
+
+                            <!-- NÚT MỞ POPUP ĐIỂM DANH TÍCH LŨY 7 NGÀY -->
+                            <a href="javascript:void(0)" onclick="openDailyCheckInModal()" class="dropdown-item" style="color: #e65100; font-weight: 700;">
+                                <i class="fa-solid fa-calendar-check" style="color: #ff6d00;"></i> Điểm danh nhận điểm
+                            </a>
+
                             <a href="@Url.Action("DoiMatKhau", "TaiKhoan")" class="dropdown-item">
                                 <i class="fa-solid fa-lock"></i> Đổi mật khẩu
                             </a>
@@ -549,17 +1175,26 @@
     </footer>
 
     <!-- ======================================================== -->
-    <!-- KHU VỰC NÚT NỔI VÀ KHUNG CHAT AI -->
+    <!-- KHU VỰC NÚT NỔI VÀ KHUNG CHAT AI (GÓC DƯỚI PHẢI) -->
     <!-- ======================================================== -->
+    @{
+        string linkLogoAI = "https://i.postimg.cc/Z9Y0cNkC/548a4112b9687cca06cdffe9.png";
+    }
+
     <div class="chat-widget-container no-print">
         <button id="btnScrollTop" class="chat-btn scroll-top-btn" onclick="scrollToTop()" title="Lên đầu trang">
             <i class="fa-solid fa-arrow-up"></i>
         </button>
 
-        <!-- Nút Trợ lý AI mới thêm vào -->
-        <button onclick="toggleAIChat()" class="chat-btn ai-btn" title="Hỏi AI Tư Vấn">
-            <i class="fa-solid fa-robot fa-bounce" style="--fa-animation-duration: 3s;"></i>
-        </button>
+        <!-- Cụm nút AI kèm Popup nhỏ 24/7 -->
+        <div class="ai-widget-wrapper">
+            <div id="aiTooltipPopup" class="ai-tooltip-popup" onclick="toggleAIChat()">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Giải đáp mọi thắc mắc 24/7 ở đây
+            </div>
+            <button onclick="toggleAIChat()" class="chat-btn ai-btn" title="Hỏi AI Tư Vấn">
+                <img src="@linkLogoAI" alt="AI AiraStore" onerror="this.src='https://cdn-icons-png.flaticon.com/512/4712/4712035.png'" />
+            </button>
+        </div>
 
         <a href="https://www.facebook.com/share/15yEeuiapDZ/" target="_blank" class="chat-btn mess-btn">
             <i class="fa-brands fa-facebook-messenger"></i>
@@ -572,17 +1207,53 @@
     <!-- Khung giao diện Chat AI -->
     <div id="aiChatBox" class="ai-chat-box no-print">
         <div class="ai-chat-header">
-            <span><i class="fa-solid fa-wand-magic-sparkles"></i> AI Trợ Lý AiraStore</span>
+            <span style="display: flex; align-items: center; gap: 8px;">
+                <img src="@linkLogoAI" style="width: 30px; height: 30px; border-radius: 50%; background: #fff; border: 1.5px solid #fff; object-fit: cover;" onerror="this.src='https://cdn-icons-png.flaticon.com/512/4712/4712035.png'" />
+                AI Trợ Lý AiraStore
+            </span>
             <i class="fa-solid fa-xmark ai-chat-close" onclick="toggleAIChat()"></i>
         </div>
         <div class="ai-chat-body" id="aiChatBody">
             <div class="ai-msg-bubble msg-bot">
-                Chào bạn! Mình là AI trợ lý ảo của AiraStore. Mình có thể giúp bạn tìm kiếm điện thoại, tư vấn cấu hình, hoặc giải đáp các thắc mắc. Bạn cần hỗ trợ gì ạ?
+                Chào bạn! Mình là Aira - trợ lý ảo của AiraStore. Mình có thể giúp bạn tìm kiếm điện thoại, tư vấn cấu hình, hoặc giải đáp các thắc mắc 24/7. Bạn cần hỗ trợ gì ạ?
             </div>
         </div>
         <div class="ai-chat-footer">
-            <input type="text" id="aiChatInput" placeholder="Hỏi AI tư vấn..." onkeypress="handleAIKeyPress(event)" autocomplete="off" />
+            <input type="text" id="aiChatInput" placeholder="Hỏi Aira tư vấn..." onkeypress="handleAIKeyPress(event)" autocomplete="off" />
             <button onclick="sendAIMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- KHU VỰC NÚT NỔI ĐIỂM DANH & NHÃN HÃY THỬ NGAY (GÓC DƯỚI TRÁI) -->
+    <!-- ======================================================== -->
+    <div class="floating-checkin-wrapper no-print">
+        <button class="floating-checkin-btn" onclick="openDailyCheckInModal()">
+            <i class="fa-solid fa-calendar-check"></i>
+            <span>Điểm Danh Nhận Điểm</span>
+        </button>
+        <a href="@Url.Action("MiniGame", "TaiKhoan")" class="floating-hand-prompt">
+            <i class="fa-solid fa-hand-point-left"></i> Hãy thử ngay Mini Game!
+        </a>
+    </div>
+
+    <!-- POPUP ĐIỂM DANH TÍCH LŨY 7 NGÀY LIÊN TỤC -->
+    <div id="dailyCheckInModal" class="checkin-modal-overlay no-print">
+        <div class="checkin-modal-card">
+            <div class="checkin-header">
+                <i class="fa-solid fa-xmark checkin-close" onclick="closeDailyCheckInModal()"></i>
+                <h3><i class="fa-solid fa-gift" style="color: #FFD700;"></i> Điểm Danh Tích Lũy 7 Ngày</h3>
+                <p>Điểm danh liên tục mỗi ngày để nhận tối đa điểm thưởng! (Bỏ lỡ 1 ngày sẽ quay về Thứ 2)</p>
+            </div>
+            <div class="checkin-body">
+                <div class="streak-grid" id="streakGridContainer">
+                    <!-- JS tự động render 7 mốc Thứ 2 -> Chủ Nhật -->
+                </div>
+                <div id="checkinStatusText" style="margin-bottom: 15px; font-size: 14px; font-weight: 700; color: #28a745;"></div>
+                <button type="button" id="btnClaimDaily" class="btn-claim-checkin" onclick="claimDailyPoints()">
+                    ĐIỂM DANH NHẬN ĐIỂM NGAY
+                </button>
+            </div>
         </div>
     </div>
 
@@ -601,7 +1272,6 @@
                 return;
             }
 
-            // Kỹ thuật Debounce: Chờ khách gõ xong (300ms) mới gửi Request để không bị lag web
             clearTimeout(timKiemTimeout);
             timKiemTimeout = setTimeout(() => {
                 fetch(`/Home/GoiYTimKiem?tuKhoa=${encodeURIComponent(tuKhoa)}`)
@@ -610,17 +1280,16 @@
                         if (data.length > 0) {
                             let html = `<div class="suggest-header"><i class="fa-solid fa-fire" style="color:#D70018;"></i> Có phải bạn muốn tìm</div>`;
                             data.forEach(item => {
-                                // Định dạng tiền tệ VND
                                 let price = item.GiaBan.toLocaleString('vi-VN') + 'đ';
                                 html += `
-                                        <a href="/Home/Details/${item.MaSP}" class="suggest-item">
-                                            <img src="${item.HinhAnh}" class="suggest-img" onerror="this.src='https://via.placeholder.com/50'"/>
-                                            <div class="suggest-info">
-                                                <span class="suggest-name">${item.TenSP}</span>
-                                                <span class="suggest-price">${price}</span>
-                                            </div>
-                                        </a>
-                                    `;
+                                                <a href="/Home/Details/${item.MaSP}" class="suggest-item">
+                                                    <img src="${item.HinhAnh}" class="suggest-img" onerror="this.src='https://via.placeholder.com/50'"/>
+                                                    <div class="suggest-info">
+                                                        <span class="suggest-name">${item.TenSP}</span>
+                                                        <span class="suggest-price">${price}</span>
+                                                    </div>
+                                                </a>
+                                            `;
                             });
                             suggestBox.innerHTML = html;
                             suggestBox.style.display = 'block';
@@ -633,7 +1302,6 @@
             }, 300);
         }
 
-        // Tự động ẩn khung gợi ý khi click chuột ra chỗ khác
         document.addEventListener('click', function (e) {
             const suggestBox = document.getElementById('search-suggest-box');
             const searchInput = document.getElementById('txtSearchMain');
@@ -642,14 +1310,12 @@
             }
         });
 
-        // Tự động hiện lại khung gợi ý khi click chuột vào lại ô tìm kiếm
         document.getElementById('txtSearchMain').addEventListener('focus', function () {
             if (this.value.trim().length > 0) {
                 goiYTimKiemSmart();
             }
         });
 
-        // JS Xử lý cuộn trang
         window.onscroll = function () { checkScrollPosition() };
 
         function checkScrollPosition() {
@@ -665,13 +1331,19 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // JS XỬ LÝ CHAT AI
+        // ========================================================
+        // JS XỬ LÝ CHAT AI (ẨN/HIỆN POPUP KHI MỞ CHAT)
+        // ========================================================
         function toggleAIChat() {
             const chatBox = document.getElementById('aiChatBox');
+            const tooltip = document.getElementById('aiTooltipPopup');
+
             if (chatBox.style.display === 'flex') {
                 chatBox.style.display = 'none';
+                if (tooltip) tooltip.style.display = 'flex';
             } else {
                 chatBox.style.display = 'flex';
+                if (tooltip) tooltip.style.display = 'none';
                 document.getElementById('aiChatInput').focus();
             }
         }
@@ -687,15 +1359,12 @@
             const message = inputField.value.trim();
             if (!message) return;
 
-            // 1. In câu hỏi của User lên giao diện
             appendAIMessage(message, 'user');
-            inputField.value = ''; // Xóa ô nhập
+            inputField.value = '';
 
-            // 2. Hiển thị trạng thái AI đang gõ
             const typingId = 'typing-' + Date.now();
             appendAIMessage('<i class="fa-solid fa-ellipsis fa-fade"></i> Trợ lý đang suy nghĩ...', 'bot', typingId);
 
-            // 3. Gửi Ajax (fetch) lên Server (Sẽ xử lý trong HomeController)
             fetch('/Home/TuVanAI', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -703,12 +1372,15 @@
             })
                 .then(response => response.json())
                 .then(data => {
-                    // Xóa trạng thái đang gõ
                     document.getElementById(typingId).remove();
 
                     if (data.success) {
-                        // In câu trả lời của AI
                         appendAIMessage(data.answer, 'bot');
+                        if (data.products && data.products.length > 0) {
+                            data.products.forEach(sp => {
+                                appendProductCard(sp);
+                            });
+                        }
                     } else {
                         appendAIMessage('Xin lỗi, hệ thống AI đang bận. Bạn vui lòng thử lại sau nhé!', 'bot');
                     }
@@ -724,14 +1396,162 @@
             const div = document.createElement('div');
             div.className = `ai-msg-bubble msg-${sender}`;
             if (elementId) div.id = elementId;
-
-            // Xử lý xuống dòng cho text
             div.innerHTML = text.replace(/\n/g, '<br/>');
-
             chatBody.appendChild(div);
-            // Cuộn xuống cuối cùng
             chatBody.scrollTop = chatBody.scrollHeight;
         }
+
+        function appendProductCard(product) {
+            const chatBody = document.getElementById('aiChatBody');
+            const a = document.createElement('a');
+            a.className = 'ai-product-card msg-bot';
+            a.href = `/Home/Details/${product.MaSP}`;
+
+            const price = product.GiaBan.toLocaleString('vi-VN') + 'đ';
+
+            a.innerHTML = `
+                        <img src="${product.HinhAnh}" class="ai-product-img" onerror="this.src='https://via.placeholder.com/50'" />
+                        <div class="ai-product-info">
+                            <span class="ai-product-name">${product.TenSP}</span>
+                            <span class="ai-product-price">${price}</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-right" style="color: #ccc; font-size: 12px; margin-left: 5px;"></i>
+                    `;
+
+            chatBody.appendChild(a);
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
+
+        // ========================================================
+        // JS XỬ LÝ POPUP ĐIỂM DANH TÍCH LŨY 7 NGÀY LIÊN TỤC
+        // ========================================================
+        const scheduleDays = [
+            { step: 1, name: "Thứ 2", pts: 10 },
+            { step: 2, name: "Thứ 3", pts: 10 },
+            { step: 3, name: "Thứ 4", pts: 10 },
+            { step: 4, name: "Thứ 5", pts: 15 },
+            { step: 5, name: "Thứ 6", pts: 15 },
+            { step: 6, name: "Thứ 7", pts: 20 },
+            { step: 7, name: "Chủ Nhật (Đặc Biệt)", pts: 20 }
+        ];
+
+        function openDailyCheckInModal() {
+            const modal = document.getElementById('dailyCheckInModal');
+            modal.style.display = 'flex';
+            loadCheckInStatus();
+        }
+
+        function closeDailyCheckInModal() {
+            document.getElementById('dailyCheckInModal').style.display = 'none';
+        }
+
+        function loadCheckInStatus() {
+            fetch('/TaiKhoan/TrangThaiDiemDanh')
+                .then(res => res.json())
+                .then(data => {
+                    const grid = document.getElementById('streakGridContainer');
+                    const btn = document.getElementById('btnClaimDaily');
+                    const msg = document.getElementById('checkinStatusText');
+
+                    if (!data.loggedIn) {
+                        grid.innerHTML = scheduleDays.map(d => `
+                                        <div class="streak-day-box ${d.step === 7 ? 'day-sunday' : ''}">
+                                            <span class="day-label">${d.name}</span>
+                                            <i class="fa-solid fa-coins" style="color:#ffc107; font-size:20px;"></i>
+                                            <span class="day-pts">+${d.pts} điểm</span>
+                                        </div>
+                                    `).join('');
+                        msg.style.color = '#D70018';
+                        msg.innerText = 'Vui lòng đăng nhập tài khoản để bắt đầu chuỗi điểm danh!';
+                        btn.onclick = function () { window.location.href = '/TaiKhoan/DangNhap'; };
+                        btn.innerText = 'ĐĂNG NHẬP ĐỂ NHẬN ĐIỂM';
+                        btn.disabled = false;
+                        return;
+                    }
+
+                    grid.innerHTML = scheduleDays.map(d => {
+                        let cls = d.step === 7 ? 'day-sunday ' : '';
+                        let icon = '<i class="fa-solid fa-coins" style="color:#ffc107; font-size:20px;"></i>';
+                        if (d.step <= data.streak) {
+                            cls += 'claimed';
+                            icon = '<i class="fa-solid fa-circle-check" style="color:#D70018; font-size:20px;"></i>';
+                        } else if (!data.checkedInToday && d.step === data.nextDayStep) {
+                            cls += 'today-target';
+                        }
+                        return `
+                                        <div class="streak-day-box ${cls}">
+                                            <span class="day-label">${d.name}</span>
+                                            ${icon}
+                                            <span class="day-pts">+${d.pts} điểm</span>
+                                        </div>
+                                    `;
+                    }).join('');
+
+                    if (data.checkedInToday) {
+                        btn.disabled = true;
+                        btn.innerText = 'HÔM NAY BẠN ĐÃ ĐIỂM DANH RỒI';
+                        msg.style.color = '#28a745';
+                        msg.innerText = `Chuỗi hiện tại: ${data.streak}/7 ngày liên tục | Ví điểm: ${data.currentPoints} điểm`;
+                    } else {
+                        btn.disabled = false;
+                        btn.innerText = `NHẬN NGAY +${scheduleDays[data.nextDayStep - 1].pts} ĐIỂM (${scheduleDays[data.nextDayStep - 1].name})`;
+                        btn.onclick = claimDailyPoints;
+                        msg.style.color = '#e65100';
+                        msg.innerText = `Mốc hôm nay: ${scheduleDays[data.nextDayStep - 1].name} | Ví điểm hiện tại: ${data.currentPoints} điểm`;
+                    }
+                });
+        }
+
+        function claimDailyPoints() {
+            const btn = document.getElementById('btnClaimDaily');
+            btn.disabled = true;
+            btn.innerText = 'ĐANG XỬ LÝ...';
+
+            fetch('/TaiKhoan/NhanDiemDanhHangNgay', { method: 'POST' })
+                .then(res => res.json())
+                .then(data => {
+                    alert(data.message);
+                    loadCheckInStatus();
+                    const walletEl = document.getElementById('lblCurrentPoints');
+                    if (walletEl && data.newPoints !== undefined) {
+                        walletEl.innerText = data.newPoints;
+                    }
+                });
+        }
+
+        // ========================================================
+        // TÍCH HỢP LORDICON CHO TOÀN BỘ HEADER (BẰNG JAVASCRIPT)
+        // ========================================================
+        document.addEventListener("DOMContentLoaded", () => {
+            function replaceWithLordIcon(selector, srcUrl, width = '24px', colors = 'primary:#ffffff,secondary:#ffffff') {
+                const icon = document.querySelector(selector);
+                if (icon) {
+                    const wrapper = icon.parentElement;
+                    const lordIcon = document.createElement('lord-icon');
+                    lordIcon.setAttribute('src', srcUrl);
+                    lordIcon.setAttribute('trigger', 'hover');
+                    lordIcon.setAttribute('colors', colors);
+                    lordIcon.style.width = width;
+                    lordIcon.style.height = width;
+
+                    wrapper.replaceChild(lordIcon, icon);
+                }
+            }
+
+            try {
+                // 1. Giỏ hàng (Túi mua sắm nảy lên)
+                replaceWithLordIcon('.header-items .fa-cart-shopping', 'https://cdn.lordicon.com/cllunfud.json');
+
+                // 2. Yêu thích (Trái tim đập thình thịch)
+                replaceWithLordIcon('.header-items .fa-heart', 'https://cdn.lordicon.com/rjzlnunf.json');
+
+                // 3. Tin tức (Tờ báo lật trang)
+                replaceWithLordIcon('.header-items .fa-newspaper', 'https://cdn.lordicon.com/sygggnra.json');
+
+            } catch (error) {
+                console.warn("Lordicon Load Failed - Using default fallback icons.");
+            }
+        });
     </script>
 
     <!-- THÊM DÒNG NÀY ĐỂ NHẬN CODE TỪ TRANG SO SÁNH -->

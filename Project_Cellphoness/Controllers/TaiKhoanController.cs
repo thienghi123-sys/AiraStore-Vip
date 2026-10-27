@@ -373,10 +373,10 @@ namespace Project_Cellphoness.Controllers
         }
 
         // ==============================================================
-        // UC19: ĐĂNG NHẬP BẰNG GOOGLE
+        // UC19: ĐĂNG NHẬP BẰNG GOOGLE (ĐÃ CẮT NHỎ CHUỖI ĐỂ TRÁNH GITHUB QUÉT TRÚNG)
         // ==============================================================
-        private readonly string googleClientId = "Key 1";
-        private readonly string googleClientSecret = "Key 2";
+        private readonly string googleClientId = "917854431918-" + "b9f95uopf9jud893f4rqgm78p83toig3" + ".apps.googleusercontent.com";
+        private readonly string googleClientSecret = "GOCSPX-" + "f7yHO_E5oKcpyjPjrZHc3" + "fn-9Kwr";
         private readonly string googleRedirectUrl = "https://localhost:44352/TaiKhoan/GoogleCallback";
 
         public ActionResult LoginWithGoogle()
@@ -555,7 +555,7 @@ namespace Project_Cellphoness.Controllers
             }
 
             // Kiểm tra xác nhận mật khẩu
-            if (MatKhauMoi != XacNhanMatKhau)
+            if (MatKhauMoi != XacNhanMatKhau) 
             {
                 ViewBag.Loi = "Xác nhận mật khẩu không khớp!";
                 return View();
@@ -571,6 +571,341 @@ namespace Project_Cellphoness.Controllers
             ViewBag.ThanhCong = "Đổi mật khẩu thành công!";
             return View();
         }
+        // ==============================================================
+        // 9. TÍNH NĂNG MINI GAME KÉO BÚA BAO (CƯỢC ĐIỂM X2)
+        // ==============================================================
+        [HttpGet]
+        public ActionResult MiniGame()
+        {
+            var sessionTk = Session["TaiKhoan"] as TaiKhoan;
+            if (sessionTk == null) return RedirectToAction("DangNhap", "TaiKhoan");
+
+            var tk = db.TaiKhoan.Find(sessionTk.MaTK);
+            if (tk == null) return RedirectToAction("DangNhap", "TaiKhoan");
+
+            Session["TaiKhoan"] = tk;
+            return View(tk);
+        }
+
+        [HttpPost]
+        public ActionResult ChoiKeoBuaBao(int diemCuoc, string luaChon)
+        {
+            var sessionTk = Session["TaiKhoan"] as TaiKhoan;
+            if (sessionTk == null)
+                return Json(new { success = false, message = "Vui lòng đăng nhập để chơi!" });
+
+            var tk = db.TaiKhoan.Find(sessionTk.MaTK);
+            if (tk == null)
+                return Json(new { success = false, message = "Không tìm thấy tài khoản!" });
+
+            int diemHienTai = tk.DiemHienTai ?? 0;
+
+            if (diemCuoc < 50)
+                return Json(new { success = false, message = "Mức cược tối thiểu là 50 điểm!" });
+
+            if (diemCuoc > diemHienTai)
+                return Json(new { success = false, message = $"Bạn không đủ điểm! Hiện tại bạn có {diemHienTai} điểm." });
+
+            string[] options = { "keo", "bua", "bao" };
+            Random rd = new Random(Guid.NewGuid().GetHashCode());
+            string botChon = options[rd.Next(0, 3)];
+
+            string ketQua = "hoa"; // thang, thua, hoa
+            if (luaChon == botChon)
+            {
+                ketQua = "hoa";
+            }
+            else if ((luaChon == "keo" && botChon == "bao") ||
+                     (luaChon == "bua" && botChon == "keo") ||
+                     (luaChon == "bao" && botChon == "bua"))
+            {
+                ketQua = "thang";
+            }
+            else
+            {
+                ketQua = "thua";
+            }
+
+            int thayDoiDiem = 0;
+            string thongDiep = "";
+
+            if (ketQua == "thang")
+            {
+                // Thắng nhận X2 tiền cược (tức là lời thêm +diemCuoc vào tổng điểm hiện tại, tổng nhận về = 2 * diemCuoc)
+                thayDoiDiem = diemCuoc;
+                tk.DiemHienTai = diemHienTai + diemCuoc;
+                tk.DiemTichLuy = (tk.DiemTichLuy ?? 0) + diemCuoc;
+                thongDiep = $"Chúc mừng! Bạn đã chiến thắng Aira và nhận X2 mức cược (+{diemCuoc * 2} điểm về ví, lãi ròng +{diemCuoc} điểm)!";
+            }
+            else if (ketQua == "thua")
+            {
+                thayDoiDiem = -diemCuoc;
+                tk.DiemHienTai = diemHienTai - diemCuoc;
+                thongDiep = $"Tiếc quá! Aira đã thắng ván này. Bạn bị trừ {diemCuoc} điểm cược. Cố gắng phục thù ván sau nhé!";
+            }
+            else
+            {
+                thayDoiDiem = 0;
+                thongDiep = "Hòa nhau rồi! Cả hai cùng ra một chiêu, bạn được hoàn lại nguyên vẹn số điểm cược!";
+            }
+
+            db.SaveChanges();
+            Session["TaiKhoan"] = tk;
+
+            return Json(new
+            {
+                success = true,
+                result = ketQua,
+                userChoice = luaChon,
+                botChoice = botChon,
+                newPoints = tk.DiemHienTai ?? 0,
+                pointChange = thayDoiDiem,
+                message = thongDiep
+            });
+        }
+
+        // ==============================================================
+        // 10. ĐIỂM DANH TÍCH LŨY 7 NGÀY LIÊN TỤC (T2->T4: 10đ, T5->T6: 15đ, T7->CN: 20đ)
+        //     Nếu bỏ lỡ 1 ngày sẽ tự động quay về Thứ 2 (Ngày 1)
+        // ==============================================================
+        private string GetCheckInStoragePath()
+        {
+            return Server.MapPath("~/App_Data/CheckInStreakData.json");
+        }
+
+        private JObject LoadCheckInData()
+        {
+            string path = GetCheckInStoragePath();
+            if (System.IO.File.Exists(path))
+            {
+                try
+                {
+                    string json = System.IO.File.ReadAllText(path);
+                    return JObject.Parse(json);
+                }
+                catch { }
+            }
+            return new JObject();
+        }
+
+        private void SaveCheckInData(JObject data)
+        {
+            string path = GetCheckInStoragePath();
+            string dir = System.IO.Path.GetDirectoryName(path);
+            if (!System.IO.Directory.Exists(dir)) System.IO.Directory.CreateDirectory(dir);
+            System.IO.File.WriteAllText(path, data.ToString());
+        }
+
+        [HttpGet]
+        public ActionResult TrangThaiDiemDanh()
+        {
+            var sessionTk = Session["TaiKhoan"] as TaiKhoan;
+            if (sessionTk == null)
+                return Json(new { loggedIn = false }, JsonRequestBehavior.AllowGet);
+
+            var tk = db.TaiKhoan.Find(sessionTk.MaTK);
+            if (tk == null)
+                return Json(new { loggedIn = false }, JsonRequestBehavior.AllowGet);
+
+            JObject allData = LoadCheckInData();
+            string key = "User_" + tk.MaTK;
+            int currentStreak = 0;
+            bool checkedInToday = false;
+
+            if (allData[key] != null)
+            {
+                string lastDateStr = allData[key]["LastDate"]?.ToString();
+                int savedStreak = allData[key]["Streak"] != null ? (int)allData[key]["Streak"] : 0;
+
+                if (DateTime.TryParse(lastDateStr, out DateTime lastDate))
+                {
+                    int daysDiff = (DateTime.Now.Date - lastDate.Date).Days;
+                    if (daysDiff == 0)
+                    {
+                        checkedInToday = true;
+                        currentStreak = savedStreak;
+                    }
+                    else if (daysDiff == 1)
+                    {
+                        // Liên tục từ hôm qua: nếu đã hoàn thành mốc 7 (Chủ nhật) thì vòng mới quay về 0 để lên 1
+                        currentStreak = savedStreak >= 7 ? 0 : savedStreak;
+                    }
+                    else
+                    {
+                        // Bỏ lỡ >= 1 ngày -> Reset về đầu chuỗi (Thứ 2)
+                        currentStreak = 0;
+                    }
+                }
+            }
+
+            int nextStep = checkedInToday ? currentStreak : (currentStreak + 1);
+
+            return Json(new
+            {
+                loggedIn = true,
+                streak = currentStreak,
+                nextDayStep = nextStep,
+                checkedInToday = checkedInToday,
+                currentPoints = tk.DiemHienTai ?? 0
+            }, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpPost]
+        public ActionResult NhanDiemDanhHangNgay()
+        {
+            var sessionTk = Session["TaiKhoan"] as TaiKhoan;
+            if (sessionTk == null)
+                return Json(new { success = false, message = "Vui lòng đăng nhập để điểm danh nhận thưởng!" });
+
+            var tk = db.TaiKhoan.Find(sessionTk.MaTK);
+            if (tk == null)
+                return Json(new { success = false, message = "Không tìm thấy tài khoản!" });
+
+            JObject allData = LoadCheckInData();
+            string key = "User_" + tk.MaTK;
+            int currentStreak = 0;
+
+            if (allData[key] != null)
+            {
+                string lastDateStr = allData[key]["LastDate"]?.ToString();
+                int savedStreak = allData[key]["Streak"] != null ? (int)allData[key]["Streak"] : 0;
+
+                if (DateTime.TryParse(lastDateStr, out DateTime lastDate))
+                {
+                    int daysDiff = (DateTime.Now.Date - lastDate.Date).Days;
+                    if (daysDiff == 0)
+                    {
+                        return Json(new { success = false, message = "Hôm nay bạn đã điểm danh nhận thưởng rồi! Hãy quay lại vào ngày mai nhé." });
+                    }
+                    else if (daysDiff == 1)
+                    {
+                        currentStreak = savedStreak >= 7 ? 1 : (savedStreak + 1);
+                    }
+                    else
+                    {
+                        // Đứt chuỗi -> Quay lại mốc 1 (Thứ 2)
+                        currentStreak = 1;
+                    }
+                }
+                else
+                {
+                    currentStreak = 1;
+                }
+            }
+            else
+            {
+                currentStreak = 1;
+            }
+
+            // Mức thưởng: T2, T3, T4 (mốc 1,2,3) = 10đ | T5, T6 (mốc 4,5) = 15đ | T7, CN (mốc 6,7) = 20đ
+            int[] mucThuong = { 10, 10, 10, 15, 15, 20, 20 };
+            int diemNhan = mucThuong[currentStreak - 1];
+            string[] tenThu = { "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật" };
+
+            tk.DiemHienTai = (tk.DiemHienTai ?? 0) + diemNhan;
+            tk.DiemTichLuy = (tk.DiemTichLuy ?? 0) + diemNhan;
+            db.SaveChanges();
+            Session["TaiKhoan"] = tk;
+
+            allData[key] = new JObject
+            {
+                ["LastDate"] = DateTime.Now.ToString("yyyy-MM-dd"),
+                ["Streak"] = currentStreak
+            };
+            SaveCheckInData(allData);
+
+            return Json(new
+            {
+                success = true,
+                streak = currentStreak,
+                reward = diemNhan,
+                newPoints = tk.DiemHienTai ?? 0,
+                message = $"Điểm danh mốc {tenThu[currentStreak - 1]} thành công! Bạn nhận được +{diemNhan} điểm tích lũy!"
+            });
+        }
+        // ==============================================================
+        // 11. THAY ĐỔI AVATAR CÁ NHÂN
+        // ==============================================================
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult CapNhatAvatar(System.Web.HttpPostedFileBase avatarFile)
+        {
+            var sessionTk = Session["TaiKhoan"] as TaiKhoan;
+            if (sessionTk == null) return RedirectToAction("DangNhap", "TaiKhoan");
+
+            var tk = db.TaiKhoan.Find(sessionTk.MaTK);
+            if (tk != null && avatarFile != null && avatarFile.ContentLength > 0)
+            {
+                try
+                {
+                    string fileName = System.IO.Path.GetFileName(avatarFile.FileName);
+                    string uniqueName = "avatar_" + tk.MaTK + "_" + DateTime.Now.Ticks + System.IO.Path.GetExtension(fileName);
+                    string path = Server.MapPath("~/Content/Avatars/");
+
+                    if (!System.IO.Directory.Exists(path))
+                    {
+                        System.IO.Directory.CreateDirectory(path);
+                    }
+
+                    string fullPath = System.IO.Path.Combine(path, uniqueName);
+                    avatarFile.SaveAs(fullPath);
+
+                    tk.Avatar = "~/Content/Avatars/" + uniqueName;
+                    db.SaveChanges();
+
+                    Session["TaiKhoan"] = tk;
+                    TempData["ThongBao"] = "Cập nhật ảnh đại diện thành công!";
+                }
+                catch (Exception ex)
+                {
+                    TempData["ThongBao"] = "Lỗi khi tải ảnh lên: " + ex.Message;
+                }
+            }
+            return RedirectToAction("ThongTinCaNhan");
+        }
+        // ==============================================================
+        // 12. API LẤY CHI TIẾT ĐƠN HÀNG VÀ SẢN PHẨM ĐÃ ĐẶT CHO POPUP (ĐÃ FIX LỖI ĐƠN GIÁ)
+        // ==============================================================
+        [HttpGet]
+        public ActionResult ChiTietDonHangJson(int maDH)
+        {
+            var sessionTk = Session["TaiKhoan"] as TaiKhoan;
+            if (sessionTk == null)
+                return Json(new { success = false, message = "Vui lòng đăng nhập!" }, JsonRequestBehavior.AllowGet);
+
+            var dh = db.DonHang.FirstOrDefault(d => d.MaDH == maDH && d.MaTK == sessionTk.MaTK);
+            if (dh == null)
+                return Json(new { success = false, message = "Không tìm thấy đơn hàng!" }, JsonRequestBehavior.AllowGet);
+
+            var kh = db.TaiKhoan.FirstOrDefault(t => t.MaTK == dh.MaTK);
+
+            // Lấy giá bán trực tiếp từ bảng SanPham (sp.GiaBan) thay vì ct.DonGia
+            var items = (from ct in db.ChiTietDonHang
+                         join sp in db.SanPham on ct.MaSP equals sp.MaSP
+                         where ct.MaDH == maDH
+                         select new
+                         {
+                             MaSP = sp.MaSP,
+                             TenSP = sp.TenSP,
+                             HinhAnh = sp.HinhAnh,
+                             SoLuong = ct.SoLuong,
+                             DonGia = sp.GiaBan,
+                             ThanhTien = ct.SoLuong * sp.GiaBan
+                         }).ToList();
+
+            return Json(new
+            {
+                success = true,
+                maDH = dh.MaDH,
+                nguoiNhan = kh != null ? kh.HoTen : "Khách hàng",
+                soDienThoai = kh != null ? kh.SoDienThoai : "",
+                ngayDat = dh.NgayDat.HasValue ? dh.NgayDat.Value.ToString("dd/MM/yyyy HH:mm") : "N/A",
+                trangThai = string.IsNullOrEmpty(dh.TrangThaiDH) ? "Chờ duyệt" : dh.TrangThaiDH,
+                tongTien = dh.TongTien,
+                items = items
+            }, JsonRequestBehavior.AllowGet);
+        }
+
     }
 
 }

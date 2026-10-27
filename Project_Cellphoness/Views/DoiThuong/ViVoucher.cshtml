@@ -1,0 +1,211 @@
+﻿@model IEnumerable<Project_Cellphoness.Controllers.ChiTietViVoucher>
+
+@{
+    ViewBag.Title = "Ví Voucher của tôi";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    DateTime now = DateTime.Now;
+}
+
+<style>
+    .profile-page {
+        display: flex;
+        gap: 20px;
+        margin-top: 20px;
+    }
+
+    .profile-content {
+        flex: 1;
+        background: #fff;
+        border-radius: 12px;
+        padding: 30px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        min-width: 0;
+    }
+
+    .profile-header {
+        border-bottom: 1px solid #eee;
+        padding-bottom: 15px;
+        margin-bottom: 25px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+        .profile-header h2 {
+            margin: 0 0 5px 0;
+            font-size: 20px;
+            color: #333;
+        }
+
+        .profile-header p {
+            margin: 0;
+            color: #666;
+            font-size: 14px;
+        }
+
+    /* CSS cho Vé trong Ví */
+    .wallet-item {
+        display: flex;
+        background: #fff;
+        border: 1px solid #e0e0e0;
+        border-radius: 10px;
+        margin-bottom: 15px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+        overflow: hidden;
+        transition: transform 0.2s;
+    }
+
+        .wallet-item:hover {
+            transform: translateY(-2px);
+        }
+
+    .w-left {
+        background: linear-gradient(135deg, #ff9a44, #fc6076);
+        color: white;
+        width: 130px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 15px;
+        position: relative;
+    }
+
+        .w-left::after {
+            content: '';
+            position: absolute;
+            right: -8px;
+            top: 0;
+            bottom: 0;
+            width: 16px;
+            background-image: radial-gradient(circle at 16px 8px, transparent 0, transparent 4px, #fff 5px);
+            background-size: 16px 16px;
+        }
+
+    .w-right {
+        padding: 15px 20px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .w-code {
+        font-size: 18px;
+        font-weight: 900;
+        color: #333;
+        margin-bottom: 5px;
+        text-transform: uppercase;
+    }
+
+    .w-desc {
+        font-size: 14px;
+        color: #666;
+        margin-bottom: 10px;
+    }
+
+    .w-meta {
+        font-size: 13px;
+        color: #888;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .status-badge {
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+
+    .st-ready {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .st-used {
+        background: #e2e3e5;
+        color: #383d41;
+    }
+
+    .st-expired {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    /* Làm mờ vé nếu đã dùng hoặc hết hạn */
+    .wallet-item.disabled {
+        opacity: 0.6;
+        filter: grayscale(100%);
+    }
+</style>
+
+<div class="profile-page">
+    <!-- GỌI MENU DÙNG CHUNG ĐỒNG BỘ 100% -->
+    @Html.Partial("~/Views/TaiKhoan/_MenuTaiKhoan.cshtml")
+
+    <!-- KHUNG HIỂN THỊ VOUCHER -->
+    <div class="profile-content">
+        <div class="profile-header">
+            <div>
+                <h2><i class="fa-solid fa-ticket" style="color: #D70018;"></i> Ví Voucher của tôi</h2>
+                <p>Danh sách các mã khuyến mãi bạn đang sở hữu</p>
+            </div>
+            <a href="@Url.Action("Index", "DoiThuong")" style="background: var(--red-cps, #D70018); color: white; padding: 9px 18px; border-radius: 6px; text-decoration: none; font-size: 14px; font-weight: bold; transition: 0.2s;">
+                <i class="fa-solid fa-plus"></i> Đổi mã mới
+            </a>
+        </div>
+
+        @if (Model != null && Model.Any())
+        {
+            foreach (var item in Model)
+            {
+                bool isExpired = item.NgayKetThuc < now;
+                bool isUsed = item.TrangThaiSD == true;
+                string itemClass = (isExpired || isUsed) ? "wallet-item disabled" : "wallet-item";
+
+                <div class="@itemClass">
+                    <div class="w-left">
+                        <i class="fa-solid fa-ticket" style="font-size: 24px; margin-bottom: 5px;"></i>
+                        <b style="font-size: 20px;">@item.PhanTramGiam%</b>
+                    </div>
+                    <div class="w-right">
+                        <div class="w-code">MÃ CODE: @item.MaVoucher</div>
+                        <div class="w-desc">
+                            Giảm @item.PhanTramGiam%
+                            @(item.GiaTriToiDa != null ? "tối đa " + String.Format("{0:0,0}", item.GiaTriToiDa).Replace(",", ".") + "đ" : "")
+                            @(item.DonToiThieu != null ? "cho đơn từ " + String.Format("{0:0,0}", item.DonToiThieu).Replace(",", ".") + "đ" : "")
+                        </div>
+                        <div class="w-meta">
+                            <span><i class="fa-regular fa-clock"></i> HSD: @item.NgayKetThuc.Value.ToString("dd/MM/yyyy HH:mm")</span>
+
+                            @if (isUsed)
+                            {
+                                <span class="status-badge st-used">Đã sử dụng</span>
+                            }
+                            else if (isExpired)
+                            {
+                                <span class="status-badge st-expired">Hết hạn</span>
+                            }
+                            else
+                            {
+                                <span class="status-badge st-ready">Sẵn sàng sử dụng</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div style="text-align: center; padding: 50px; background: #f8f9fa; border-radius: 10px; border: 1px dashed #ccc;">
+                <i class="fa-solid fa-ticket-simple" style="font-size: 50px; color: #ddd; margin-bottom: 15px;"></i>
+                <h4 style="color: #666; margin-bottom: 10px;">Ví Voucher của bạn đang trống!</h4>
+                <p style="color: #999;">Hãy dùng điểm tích lũy để đổi ngay những ưu đãi hấp dẫn.</p>
+                <a href="@Url.Action("Index", "DoiThuong")" style="display: inline-block; background: var(--red-cps, #D70018); color: white; padding: 10px 22px; border-radius: 6px; text-decoration: none; font-weight: bold; margin-top: 15px;">Đi tới Đổi Thưởng</a>
+            </div>
+        }
+    </div>
+</div>

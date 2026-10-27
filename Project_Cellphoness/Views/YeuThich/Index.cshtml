@@ -1,95 +1,506 @@
 ﻿@model IEnumerable<Project_Cellphoness.Models.SanPham>
 
 @{
-    ViewBag.Title = "Sản phẩm yêu thích";
+    ViewBag.Title = "Máy Yêu Thích";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    int totalWish = Model != null ? Model.Count() : 0;
 }
 
 <style>
-    .wishlist-container {
-        max-width: 1000px;
-        margin: 20px auto;
+    .wishlist-page-wrap {
+        max-width: 1180px;
+        margin: 25px auto 50px auto;
         background: #fff;
-        padding: 25px;
-        border-radius: 10px;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        padding: 32px;
+        border-radius: 16px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
     }
 
+    /* HEADER TIÊU ĐỀ & THANH CÔNG CỤ NHANH */
+    .wishlist-top-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 15px;
+        padding-bottom: 20px;
+        margin-bottom: 25px;
+        border-bottom: 2px solid #f1f3f5;
+    }
+
+    .wishlist-brand-title {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .heart-pulse-box {
+        width: 50px;
+        height: 50px;
+        border-radius: 14px;
+        background: linear-gradient(135deg, #ffe5e8, #ffcdd2);
+        color: var(--red-cps, #D70018);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        box-shadow: 0 4px 12px rgba(215, 0, 24, 0.16);
+    }
+
+        .heart-pulse-box i {
+            animation: heartBeatAnim 1.5s infinite ease-in-out;
+        }
+
+    @@keyframes heartBeatAnim {
+        0%, 100% {
+            transform: scale(1);
+        }
+
+        15% {
+            transform: scale(1.25);
+        }
+
+        30% {
+            transform: scale(0.95);
+        }
+
+        45% {
+            transform: scale(1.15);
+        }
+    }
+
+    .wishlist-heading h2 {
+        margin: 0 0 4px 0;
+        font-size: 24px;
+        font-weight: 900;
+        color: var(--red-cps, #D70018);
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .wishlist-badge-total {
+        background: var(--red-cps, #D70018);
+        color: #fff;
+        font-size: 13px;
+        font-weight: 800;
+        padding: 3px 12px;
+        border-radius: 20px;
+    }
+
+    .wishlist-heading p {
+        margin: 0;
+        color: #666;
+        font-size: 13.5px;
+    }
+
+    .wishlist-controls {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .wish-search-input {
+        height: 38px;
+        padding: 0 14px;
+        border: 1px solid #dee2e6;
+        border-radius: 20px;
+        font-size: 13.5px;
+        outline: none;
+        width: 210px;
+        transition: all 0.25s;
+    }
+
+        .wish-search-input:focus {
+            border-color: var(--red-cps, #D70018);
+            width: 240px;
+            box-shadow: 0 0 0 3px rgba(215, 0, 24, 0.1);
+        }
+
+    .wish-sort-select {
+        height: 38px;
+        padding: 0 12px;
+        border: 1px solid #dee2e6;
+        border-radius: 20px;
+        font-size: 13.5px;
+        color: #444;
+        font-weight: 600;
+        outline: none;
+        cursor: pointer;
+        background: #f8f9fa;
+    }
+
+    .btn-back-home {
+        background: #fdf2f3;
+        color: var(--red-cps, #D70018);
+        text-decoration: none;
+        padding: 9px 16px;
+        border-radius: 20px;
+        font-weight: 700;
+        font-size: 13.5px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.25s;
+    }
+
+        .btn-back-home:hover {
+            background: var(--red-cps, #D70018);
+            color: #fff;
+            transform: translateX(-3px);
+        }
+
+    /* LƯỚI THẺ SẢN PHẨM YÊU THÍCH */
     .wishlist-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-        gap: 15px;
-        margin-top: 20px;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 22px;
     }
 
     .wishlist-card {
-        border: 1px solid #eee;
-        border-radius: 10px;
-        padding: 15px;
+        background: #fff;
+        border: 1.5px solid #f0f0f0;
+        border-radius: 16px;
+        padding: 18px;
         text-align: center;
         position: relative;
-        transition: 0.3s;
+        display: flex;
+        flex-direction: column;
+        transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        animation: cardSlideUp 0.45s ease backwards;
+        overflow: hidden;
     }
 
-        .wishlist-card:hover {
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            transform: translateY(-5px);
+    @@keyframes cardSlideUp {
+        from {
+            opacity: 0;
+            transform: translateY(22px);
         }
 
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .wishlist-card:hover {
+        box-shadow: 0 14px 30px rgba(215, 0, 24, 0.12);
+        transform: translateY(-8px);
+        border-color: #ffb3bc;
+    }
+
+    /* Nhãn tình trạng tồn kho góc trên trái */
+    .wish-stock-badge {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 20px;
+        z-index: 4;
+    }
+
+    .stock-ready {
+        background: #e8f5e9;
+        color: #2e7d32;
+    }
+
+    .stock-out {
+        background: #ffebee;
+        color: #c62828;
+    }
+
+    /* Nút xóa bỏ yêu thích góc trên phải */
     .btn-remove-wishlist {
         position: absolute;
-        top: 10px;
-        right: 10px;
-        color: #999;
-        background: #f0f0f0;
-        width: 30px;
-        height: 30px;
+        top: 12px;
+        right: 12px;
+        color: #777;
+        background: #f1f3f5;
+        width: 32px;
+        height: 32px;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
         text-decoration: none;
-        transition: 0.3s;
+        font-size: 14px;
+        z-index: 5;
+        transition: all 0.25s ease;
     }
 
         .btn-remove-wishlist:hover {
             background: #D70018;
             color: white;
+            transform: rotate(90deg) scale(1.1);
+            box-shadow: 0 3px 10px rgba(215, 0, 24, 0.3);
         }
+
+    /* Ảnh sản phẩm có hiệu ứng nổi 3D khi hover */
+    .wish-img-box {
+        width: 100%;
+        height: 190px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 24px 0 14px 0;
+        text-decoration: none;
+    }
+
+    .wish-img {
+        width: 100%;
+        height: 180px;
+        object-fit: contain;
+        transition: transform 0.4s ease, filter 0.4s ease;
+    }
+
+    .wishlist-card:hover .wish-img {
+        transform: scale(1.08) translateY(-4px);
+        filter: drop-shadow(0 10px 14px rgba(0, 0, 0, 0.12));
+    }
+
+    .wish-title-link {
+        text-decoration: none;
+        color: #222;
+        font-size: 15px;
+        font-weight: 800;
+        line-height: 1.4;
+        margin-bottom: 8px;
+        min-height: 42px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        transition: color 0.2s;
+    }
+
+        .wish-title-link:hover {
+            color: #D70018;
+        }
+
+    .wish-price-text {
+        color: #D70018;
+        font-weight: 900;
+        font-size: 18px;
+        margin: auto 0 15px 0;
+    }
+
+    /* Cụm nút Thêm vào giỏ + So sánh cấu hình */
+    .wish-btn-group {
+        display: flex;
+        gap: 8px;
+    }
+
+    .btn-add-cart-wish {
+        flex: 1;
+        background: linear-gradient(135deg, #D70018, #ff4b2b);
+        color: white;
+        padding: 11px 12px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 800;
+        font-size: 13.5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        box-shadow: 0 4px 12px rgba(215, 0, 24, 0.25);
+        transition: all 0.25s ease;
+    }
+
+        .btn-add-cart-wish:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(215, 0, 24, 0.38);
+            color: #fff;
+        }
+
+    .btn-compare-wish {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        border: 1.5px solid #e0e0e0;
+        background: #f8f9fa;
+        color: #444;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        font-size: 15px;
+        transition: all 0.2s ease;
+        flex-shrink: 0;
+    }
+
+        .btn-compare-wish:hover {
+            border-color: #D70018;
+            color: #D70018;
+            background: #fff5f5;
+            transform: translateY(-2px);
+        }
+
+    /* Giao diện khi danh sách trống */
+    .empty-wishlist-box {
+        text-align: center;
+        padding: 60px 20px;
+        background: linear-gradient(180deg, #fff9fa 0%, #ffffff 100%);
+        border: 2px dashed #ffcdd2;
+        border-radius: 16px;
+    }
+
+    .empty-wishlist-icon {
+        font-size: 62px;
+        color: #ffadb8;
+        margin-bottom: 15px;
+        animation: floatHeartEmpty 2.5s infinite ease-in-out;
+    }
+
+    @@keyframes floatHeartEmpty {
+        0%, 100% {
+            transform: translateY(0);
+        }
+
+        50% {
+            transform: translateY(-10px);
+        }
+    }
 </style>
 
-<div class="wishlist-container">
-    <h2 style="color: #D70018; margin-bottom: 20px; font-weight: 800; text-transform: uppercase;">
-        <i class="fa-solid fa-heart"></i> MÁY BẠN ĐÃ LƯU TIM
-    </h2>
+<div class="wishlist-page-wrap">
+    <!-- HEADER: MÁY YÊU THÍCH & BỘ LỌC NHANH -->
+    <div class="wishlist-top-bar">
+        <div class="wishlist-brand-title">
+            <div class="heart-pulse-box">
+                <i class="fa-solid fa-heart"></i>
+            </div>
+            <div class="wishlist-heading">
+                <h2>
+                    Máy Yêu Thích
+                    <span class="wishlist-badge-total">@totalWish máy</span>
+                </h2>
+                <p>Danh sách các sản phẩm bạn đã thả tim lưu lại tại AiraStore</p>
+            </div>
+        </div>
 
+        <div class="wishlist-controls">
+            @if (totalWish > 0)
+            {
+                <input type="text" id="txtFilterWish" class="wish-search-input" placeholder="Tìm nhanh trong danh sách..." oninput="locMayYeuThich()" />
+                <select id="selSortWish" class="wish-sort-select" onchange="sapXepMayYeuThich()">
+                    <option value="default">Sắp xếp: Mặc định</option>
+                    <option value="price-asc">Giá: Thấp ➔ Cao</option>
+                    <option value="price-desc">Giá: Cao ➔ Thấp</option>
+                </select>
+            }
+            <a href="/" class="btn-back-home">
+                <i class="fa-solid fa-arrow-left"></i> Tiếp tục mua sắm
+            </a>
+        </div>
+    </div>
+
+    <!-- DANH SÁCH SẢN PHẨM -->
     @if (Model == null || !Model.Any())
     {
-        <div style="text-align: center; padding: 50px;">
-            <i class="fa-regular fa-heart" style="font-size: 50px; color: #ccc; margin-bottom: 15px;"></i>
-            <p style="color: #666; font-size: 16px;">Bạn chưa có sản phẩm yêu thích nào.</p>
-            <a href="/" style="background: #D70018; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none; font-weight: bold; display: inline-block; margin-top: 10px;">Về trang chủ khám phá</a>
+        <div class="empty-wishlist-box">
+            <div class="empty-wishlist-icon">
+                <i class="fa-regular fa-heart"></i>
+            </div>
+            <h3 style="color: #333; margin: 0 0 8px 0; font-size: 20px;">Bạn chưa có sản phẩm yêu thích nào!</h3>
+            <p style="color: #777; font-size: 14.5px; margin: 0 0 22px 0;">Hãy nhấn vào biểu tượng trái tim trên các mẫu điện thoại bạn yêu thích để lưu lại nhé.</p>
+            <a href="/" class="btn-add-cart-wish" style="display: inline-flex; width: auto; padding: 12px 28px; border-radius: 25px;">
+                <i class="fa-solid fa-mobile-screen-button"></i> Về trang chủ khám phá
+            </a>
         </div>
     }
     else
     {
-        <div class="wishlist-grid">
+        int idx = 0;
+        <div class="wishlist-grid" id="wishlistGridContainer">
             @foreach (var sp in Model)
             {
-                <div class="wishlist-card">
+                idx++;
+                string animDelay = (idx * 0.07).ToString("0.00", System.Globalization.CultureInfo.InvariantCulture) + "s";
+
+                <div class="wishlist-card" data-name="@sp.TenSP.ToLower()" data-price="@sp.GiaBan" style="animation-delay: @animDelay;">
+                    <!-- Nhãn tình trạng kho -->
+                    @if (sp.SoLuongTon > 0)
+                    {
+                        <span class="wish-stock-badge stock-ready"><i class="fa-solid fa-check"></i> Còn hàng</span>
+                    }
+                    else
+                    {
+                        <span class="wish-stock-badge stock-out"><i class="fa-solid fa-clock"></i> Tạm hết</span>
+                    }
+
+                    <!-- Nút bỏ thích -->
                     <a href="@Url.Action("XoaYeuThich", "YeuThich", new { id = sp.MaSP })" class="btn-remove-wishlist" title="Bỏ thích">
                         <i class="fa-solid fa-xmark"></i>
                     </a>
-                    <a href="/Home/Details/@sp.MaSP" style="text-decoration:none; color:inherit;">
-                        <img src="@sp.HinhAnh" style="width: 100%; height: 180px; object-fit: contain; margin-bottom: 15px;" onerror="this.src='https://via.placeholder.com/200'" />
-                        <h4 style="font-size: 14px; font-weight: 600; min-height: 40px;">@sp.TenSP</h4>
+
+                    <!-- Hình ảnh & Tên máy -->
+                    <a href="/Home/Details/@sp.MaSP" class="wish-img-box">
+                        <img src="@sp.HinhAnh" class="wish-img" alt="@sp.TenSP" onerror="this.src='https://via.placeholder.com/200'" />
                     </a>
-                    <p style="color: #D70018; font-weight: bold; font-size: 16px; margin-bottom: 15px;">@String.Format("{0:0,0}", sp.GiaBan).Replace(",", ".") đ</p>
-                    <a href="@Url.Action("ThemGioHang", "GioHang", new { iMaSP = sp.MaSP, strURL = Request.Url.ToString() })" style="background: #D70018; color: white; padding: 10px; border-radius: 5px; text-decoration: none; font-weight: 600; display: block;">
-                        <i class="fa-solid fa-cart-plus"></i> Thêm vào giỏ
+
+                    <a href="/Home/Details/@sp.MaSP" class="wish-title-link">
+                        @sp.TenSP
                     </a>
+
+                    <p class="wish-price-text">
+                        @String.Format("{0:0,0}", sp.GiaBan).Replace(",", ".") đ
+                    </p>
+
+                    <!-- Nút Thêm vào giỏ & So sánh -->
+                    <div class="wish-btn-group">
+                        @if (sp.SoLuongTon > 0)
+                        {
+                            <a href="@Url.Action("ThemGioHang", "GioHang", new { iMaSP = sp.MaSP, strURL = Request.Url.ToString() })" class="btn-add-cart-wish">
+                                <i class="fa-solid fa-cart-plus"></i> Thêm vào giỏ
+                            </a>
+                        }
+                        else
+                        {
+                            <a href="/Home/Details/@sp.MaSP" class="btn-add-cart-wish" style="background: #adb5bd; box-shadow: none;">
+                                <i class="fa-regular fa-eye"></i> Xem chi tiết
+                            </a>
+                        }
+
+                        <a href="@Url.Action("SoSanh", "Home", new { id1 = sp.MaSP })" class="btn-compare-wish" title="So sánh cấu hình máy này">
+                            <i class="fa-solid fa-scale-balanced"></i>
+                        </a>
+                    </div>
                 </div>
             }
         </div>
     }
 </div>
+
+<script>
+    // Lọc nhanh máy yêu thích ngay khi gõ
+    function locMayYeuThich() {
+        const kw = document.getElementById('txtFilterWish').value.trim().toLowerCase();
+        const cards = document.querySelectorAll('#wishlistGridContainer .wishlist-card');
+        cards.forEach(card => {
+            const name = card.getAttribute('data-name') || '';
+            card.style.display = name.includes(kw) ? '' : 'none';
+        });
+    }
+
+    // Sắp xếp máy yêu thích theo Giá tiền tăng/giảm
+    function sapXepMayYeuThich() {
+        const mode = document.getElementById('selSortWish').value;
+        const grid = document.getElementById('wishlistGridContainer');
+        if (!grid) return;
+
+        const cards = Array.from(grid.querySelectorAll('.wishlist-card'));
+        if (mode === 'price-asc') {
+            cards.sort((a, b) => parseFloat(a.getAttribute('data-price')) - parseFloat(b.getAttribute('data-price')));
+        } else if (mode === 'price-desc') {
+            cards.sort((a, b) => parseFloat(b.getAttribute('data-price')) - parseFloat(a.getAttribute('data-price')));
+        }
+
+        cards.forEach(c => grid.appendChild(c));
+    }
+</script>

@@ -32,6 +32,7 @@ namespace Project_Cellphoness.Models
         public string HoTenNhan { get; set; }
         public string SDTNhan { get; set; }
         public string DiaChiNhan { get; set; }
+        public Nullable<bool> DaCongDiem { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<ChiTietDonHang> ChiTietDonHang { get; set; }

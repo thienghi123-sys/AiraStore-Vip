@@ -38,5 +38,6 @@ namespace Project_Cellphoness.Models
         public virtual DbSet<TinTuc> TinTuc { get; set; }
         public virtual DbSet<YeuThich> YeuThich { get; set; }
         public virtual DbSet<sysdiagrams> sysdiagrams { get; set; }
+        public virtual DbSet<ViVoucher> ViVoucher { get; set; }
     }
 }

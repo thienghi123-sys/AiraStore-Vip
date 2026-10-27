@@ -10,17 +10,44 @@
         <h2 style="color: #333; margin: 0;"><i class="fa-solid fa-pen-to-square"></i> CHỈNH SỬA HÃNG</h2>
     </div>
 
-    @using (Html.BeginForm())
+    <!-- Đã thêm enctype để cho phép Upload File -->
+    @using (Html.BeginForm("Edit", "QuanLyHang", FormMethod.Post, new { enctype = "multipart/form-data" }))
     {
         @Html.HiddenFor(model => model.MaHang)
+
+        <!-- QUAN TRỌNG: Giữ lại đường dẫn ảnh cũ nếu Admin không tải ảnh mới lên -->
+        @Html.HiddenFor(model => model.Logo)
+
         @Html.AntiForgeryToken()
 
         <div style="margin-bottom: 20px;">
-            <label style="font-weight: bold; color: #555;">Tên Hãng Sản Xuất</label>
+            <label style="font-weight: bold; color: #555;">Tên Hãng Sản Xuất <span style="color:red">*</span></label>
             @Html.TextBoxFor(model => model.TenHang, new { @class = "form-control", style = "width:100%; padding:10px; margin-top:5px; border:1px solid #ccc; border-radius:5px;", required = "required", placeholder = "Ví dụ: Nokia, Oppo..." })
         </div>
 
-        <button type="submit" style="background: #ffc107; color: #333; border: none; padding: 12px 20px; border-radius: 5px; font-weight: bold; cursor: pointer; width: 100%; font-size: 15px;">
+        <!-- KHU VỰC CẬP NHẬT ẢNH LOGO -->
+        <div style="margin-bottom: 20px;">
+            <label style="font-weight: bold; color: #555;">Hình Ảnh (Logo Hiện Tại)</label>
+
+            <div style="margin-top: 10px; margin-bottom: 15px; text-align: center; background: #fdfdfd; padding: 15px; border: 1px dashed #ccc; border-radius: 8px;">
+                @if (!string.IsNullOrEmpty(Model.Logo))
+                {
+                    <!-- Đã thêm Url.Content để trình duyệt hiểu được dấu ~ -->
+                    <img src="@Url.Content(Model.Logo)" alt="Logo Hiện Tại" style="max-width: 120px; height: 120px; object-fit: contain;" onerror="this.src='https://via.placeholder.com/150?text=Loi+Anh'" />
+                }
+                else
+                {
+                    <img src="https://via.placeholder.com/150?text=Chua+co+Logo" alt="Chưa có Logo" style="max-width: 120px; height: 120px; object-fit: contain;" />
+                }
+            </div>
+
+            <label style="font-weight: bold; color: #555; display: block;">Thay đổi Logo (Bỏ trống nếu giữ nguyên)</label>
+            <!-- Lưu ý: Không dùng thuộc tính required ở đây để Admin có quyền không cập nhật ảnh -->
+            <input type="file" name="fileUpload" accept="image/*" style="width:100%; padding:10px; margin-top:5px; border:1px solid #ccc; border-radius:5px; background: #f9f9f9;" />
+            <small style="color: #888; display: block; margin-top: 5px;"><i>Vui lòng chọn ảnh định dạng .jpg, .png, .jpeg (Tỉ lệ 1:1)</i></small>
+        </div>
+
+        <button type="submit" style="background: #ffc107; color: #333; border: none; padding: 12px 20px; border-radius: 5px; font-weight: bold; cursor: pointer; width: 100%; font-size: 15px; transition: 0.2s;">
             <i class="fa-solid fa-floppy-disk"></i> LƯU THAY ĐỔI
         </button>
     }

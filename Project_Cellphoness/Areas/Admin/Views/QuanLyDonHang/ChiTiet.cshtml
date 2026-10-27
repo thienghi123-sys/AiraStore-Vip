@@ -32,6 +32,7 @@
         </p>
     </div>
 
+    <!-- KHU VỰC KIỂM TRA TRẠNG THÁI -->
     @if (Model.TrangThaiDH != null && Model.TrangThaiDH.Contains("Đã hủy"))
     {
         <div style="background: #f8d7da; color: #721c24; padding: 15px; border-radius: 8px; font-weight: bold; border: 1px solid #f5c6cb; margin-bottom: 20px;">
@@ -42,8 +43,24 @@
             <span style="color: #dc3545; font-weight: bold; font-size: 16px; margin-left: 10px;">@Model.TrangThaiDH</span>
         </div>
     }
+    else if (Model.TrangThaiDH == "Hoàn thành")
+    {
+        <!-- GIAO DIỆN KHÓA KHI ĐÃ HOÀN THÀNH -->
+        <div style="background: #d4edda; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 5px solid #28a745; display: flex; align-items: center; justify-content: space-between;">
+            <div>
+                <h4 style="margin: 0 0 5px 0; color: #155724;"><i class="fa-solid fa-circle-check"></i> ĐƠN HÀNG ĐÃ HOÀN THÀNH</h4>
+                <p style="margin: 0; color: #155724; font-size: 14px;">
+                    Khách hàng đã nhận hàng và được cộng điểm thưởng. <b>Không thể thay đổi trạng thái nữa!</b>
+                </p>
+            </div>
+            <div style="background: #28a745; color: white; padding: 8px 15px; border-radius: 5px; font-weight: bold; cursor: not-allowed; opacity: 0.7;">
+                <i class="fa-solid fa-lock"></i> Đã chốt
+            </div>
+        </div>
+    }
     else
     {
+        <!-- GIAO DIỆN CẬP NHẬT BÌNH THƯỜNG DÀNH CHO ĐƠN ĐANG XỬ LÝ -->
         <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 5px solid #ffc107; display: flex; align-items: center; justify-content: space-between;">
             <div>
                 <h4 style="margin: 0 0 5px 0; color: #856404;"><i class="fa-solid fa-truck-fast"></i> TÌNH TRẠNG ĐƠN HÀNG</h4>
@@ -92,7 +109,6 @@
                             @String.Format("{0:0,0}", ctdh.GiaMua * ctdh.SoLuong).Replace(",", ".") đ
                         </td>
                     </tr>
- <!-- Đã thêm thẻ đóng </tr> tại đây -->
                 }
             }
         </tbody>

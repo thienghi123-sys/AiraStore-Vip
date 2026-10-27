@@ -22,6 +22,7 @@ namespace Project_Cellphoness.Models
             this.DonHang1 = new HashSet<DonHang>();
             this.TinTuc = new HashSet<TinTuc>();
             this.YeuThich = new HashSet<YeuThich>();
+            this.ViVoucher = new HashSet<ViVoucher>();
         }
     
         public int MaTK { get; set; }
@@ -34,6 +35,9 @@ namespace Project_Cellphoness.Models
         public Nullable<bool> TrangThai { get; set; }
         public Nullable<System.DateTime> NgayTao { get; set; }
         public string DanhSachQuyen { get; set; }
+        public Nullable<int> DiemTichLuy { get; set; }
+        public Nullable<int> DiemHienTai { get; set; }
+        public string Avatar { get; set; }
     
         public virtual ChucVu ChucVu { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
@@ -46,5 +50,7 @@ namespace Project_Cellphoness.Models
         public virtual ICollection<TinTuc> TinTuc { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<YeuThich> YeuThich { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<ViVoucher> ViVoucher { get; set; }
     }
 }

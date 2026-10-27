@@ -1,22 +1,36 @@
 ﻿@model Project_Cellphoness.Models.HangSanXuat
-@{ ViewBag.Title = "Thêm Hãng Sản Xuất"; Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml"; }
+@{
+    ViewBag.Title = "Thêm Hãng Sản Xuất";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
 
 <div style="max-width: 600px; margin: 20px auto; background: #fff; padding: 25px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
     <div style="border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 20px;">
         <h2 style="color: #333; margin: 0;"><i class="fa-solid fa-plus"></i> THÊM HÃNG MỚI</h2>
     </div>
 
-    @using (Html.BeginForm())
+    <!-- Đã thêm enctype để cho phép Upload File -->
+    @using (Html.BeginForm("Create", "QuanLyHang", FormMethod.Post, new { enctype = "multipart/form-data" }))
     {
         @Html.AntiForgeryToken()
+
         <div style="margin-bottom: 20px;">
-            <label style="font-weight: bold; color: #555;">Tên Hãng Sản Xuất</label>
+            <label style="font-weight: bold; color: #555;">Tên Hãng Sản Xuất <span style="color:red">*</span></label>
             @Html.TextBoxFor(model => model.TenHang, new { @class = "form-control", style = "width:100%; padding:10px; margin-top:5px; border:1px solid #ccc; border-radius:5px;", required = "required", placeholder = "Ví dụ: Nokia, Oppo..." })
         </div>
-        <button type="submit" style="background: #28a745; color: white; border: none; padding: 12px 20px; border-radius: 5px; font-weight: bold; cursor: pointer; width: 100%;">
+
+        <!-- THÊM Ô CHỌN ẢNH LOGO -->
+        <div style="margin-bottom: 20px;">
+            <label style="font-weight: bold; color: #555;">Hình Ảnh (Logo) <span style="color:red">*</span></label>
+            <input type="file" name="fileUpload" accept="image/*" required style="width:100%; padding:10px; margin-top:5px; border:1px solid #ccc; border-radius:5px; background: #f9f9f9;" />
+            <small style="color: #888; display: block; margin-top: 5px;"><i>Vui lòng chọn ảnh định dạng .jpg, .png, .jpeg (Tỉ lệ 1:1)</i></small>
+        </div>
+
+        <button type="submit" style="background: #28a745; color: white; border: none; padding: 12px 20px; border-radius: 5px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.2s;">
             <i class="fa-solid fa-floppy-disk"></i> LƯU THÊM MỚI
         </button>
     }
+
     <div style="margin-top: 15px; text-align: center;">
         <a href="@Url.Action("Index", "QuanLyHang")" style="color: #666; text-decoration: none;"><i class="fa-solid fa-arrow-left"></i> Quay lại danh sách</a>
     </div>

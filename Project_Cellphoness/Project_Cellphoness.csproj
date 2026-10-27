@@ -146,6 +146,7 @@
     <Compile Include="Areas\Admin\Controllers\QuanLyMaGiamGiaController.cs" />
     <Compile Include="Areas\Admin\Controllers\QuanLyTaiKhoanController.cs" />
     <Compile Include="Areas\Admin\Controllers\SanPhamController.cs" />
+    <Compile Include="Controllers\DoiThuongController.cs" />
     <Compile Include="Controllers\GioHangController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\TaiKhoanController.cs" />
@@ -153,6 +154,7 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Helpers\DiemThuongHelper.cs" />
     <Compile Include="Models\Banner.cs">
       <DependentUpon>Project_CellPhoneS.tt</DependentUpon>
     </Compile>
@@ -203,6 +205,9 @@
       <DependentUpon>Project_CellPhoneS.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\TinTuc.cs">
+      <DependentUpon>Project_CellPhoneS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\ViVoucher.cs">
       <DependentUpon>Project_CellPhoneS.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\VnPayLibrary.cs" />
@@ -329,11 +334,16 @@
     <Content Include="Views\TaiKhoan\ThongTinCaNhan.cshtml" />
     <Content Include="Views\TaiKhoan\DoiMatKhau.cshtml" />
     <Content Include="Views\Home\_MenuDanhMuc.cshtml" />
+    <Content Include="Views\DoiThuong\Index.cshtml" />
+    <Content Include="Views\DoiThuong\ViVoucher.cshtml" />
+    <Content Include="Views\TaiKhoan\_MenuTaiKhoan.cshtml" />
+    <Content Include="Views\TaiKhoan\MiniGame.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="Areas\Admin\Data\" />
     <Folder Include="Areas\Admin\Views\BaseAdmin\" />
+    <Folder Include="Content\NewFolder1\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap.rtl.min.css.map" />

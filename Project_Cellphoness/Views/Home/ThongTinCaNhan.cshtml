@@ -1,8 +1,12 @@
 ﻿@model Project_Cellphoness.Models.TaiKhoan
+@using Project_Cellphoness.Helpers
 
 @{
     ViewBag.Title = "Hồ sơ cá nhân";
     Layout = "~/Views/Shared/_Layout.cshtml";
+
+    // Gọi hàm tính hạng từ Helper
+    string hangThanhVien = DiemThuongHelper.LayHangThanhVien(Model.DiemTichLuy);
 }
 
 <style>
@@ -47,6 +51,20 @@
         font-weight: bold;
         color: #333;
         font-size: 16px;
+    }
+
+    /* CSS CHUẨN CHO HUY HIỆU HẠNG THÀNH VIÊN */
+    .tier-badge {
+        display: inline-block;
+        background: linear-gradient(90deg, #ff9a44, #fc6076);
+        color: #fff;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 800;
+        margin-top: 5px;
+        text-transform: uppercase;
+        box-shadow: 0 2px 4px rgba(252, 96, 118, 0.3);
     }
 
     .profile-menu {
@@ -165,6 +183,8 @@
             <div>
                 <div style="font-size: 12px; color: #888;">Tài khoản của</div>
                 <div class="profile-name">@Model.HoTen</div>
+                <!-- HIỂN THỊ HUY HIỆU HẠNG -->
+                <div class="tier-badge"><i class="fa-solid fa-medal"></i> @hangThanhVien</div>
             </div>
         </div>
         <ul class="profile-menu">
@@ -176,6 +196,12 @@
             <li>
                 <a href="@Url.Action("LichSuDonHang", "TaiKhoan")">
                     <i class="fa-solid fa-clipboard-list"></i> Đơn mua của tôi
+                </a>
+            </li>
+            <!-- Thêm menu Ví Voucher (Chuẩn bị cho Giai đoạn 3) -->
+            <li>
+                <a href="#">
+                    <i class="fa-solid fa-ticket"></i> Ví Voucher của tôi
                 </a>
             </li>
             <li>
@@ -211,9 +237,21 @@
             <!-- Mã tài khoản ẩn để truyền về Server -->
             <input type="hidden" name="MaTK" value="@Model.MaTK" />
 
+            <!-- VÙNG HIỂN THỊ ĐIỂM SỐ (Readonly) -->
+            <div class="form-group">
+                <label>Hạng Thành Viên</label>
+                <input type="text" class="form-control" value="@hangThanhVien" readonly style="background-color: #fdf5f5; color: #D70018; font-weight: bold; border-color: #ffcdd2; cursor: not-allowed;" />
+            </div>
+
+            <div class="form-group">
+                <label>Điểm Có Sẵn</label>
+                <input type="text" class="form-control" value="@(Model.DiemHienTai ?? 0) Điểm (Dùng để đổi Voucher)" readonly style="background-color: #f8f9fa; color: #28a745; font-weight: bold; cursor: not-allowed;" />
+            </div>
+
+            <hr style="border: 0; border-top: 1px dashed #eee; margin: 20px 0;" />
+
             <div class="form-group">
                 <label>Địa chỉ Email</label>
-                <!-- Email không cho phép sửa, dùng readonly -->
                 <input type="email" class="form-control" value="@Model.Email" readonly style="background-color: #f8f9fa; cursor: not-allowed;" />
             </div>
 

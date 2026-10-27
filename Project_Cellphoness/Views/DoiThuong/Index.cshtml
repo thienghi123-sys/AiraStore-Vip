@@ -1,0 +1,323 @@
+﻿@model IEnumerable<Project_Cellphoness.Models.MaGiamGia>
+
+@{
+    ViewBag.Title = "Trung Tâm Đổi Thưởng";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    int diemHienTai = ViewBag.DiemHienTai != null ? (int)ViewBag.DiemHienTai : -1;
+}
+
+<!-- THÊM THƯ VIỆN SWEETALERT2 ĐỂ LÀM POPUP ĐẸP -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<style>
+    .profile-page {
+        display: flex;
+        gap: 20px;
+        margin-top: 20px;
+    }
+
+    .profile-content {
+        flex: 1;
+        background: #f4f6f9;
+        border-radius: 12px;
+        padding: 30px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        min-width: 0;
+    }
+
+    .reward-header {
+        text-align: center;
+        margin-bottom: 35px;
+    }
+
+        .reward-header h1 {
+            color: var(--red-cps, #D70018);
+            font-weight: 800;
+            font-size: 28px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+    .current-points {
+        background: #fff;
+        display: inline-block;
+        padding: 10px 30px;
+        border-radius: 50px;
+        font-size: 16px;
+        font-weight: bold;
+        color: #28a745;
+        box-shadow: 0 4px 10px rgba(40,167,69,0.15);
+        border: 2px solid #28a745;
+    }
+
+    .voucher-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 20px;
+        margin: 0 auto;
+    }
+
+    .voucher-card {
+        background: #fff;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        transition: transform 0.3s;
+        border: 1px solid #eee;
+        display: flex;
+        flex-direction: column;
+    }
+
+        .voucher-card:hover {
+            transform: translateY(-50px);
+            box-shadow: 0 10px 25px rgba(215,0,24,0.15);
+            border-color: #ffcccc;
+        }
+
+    .v-header {
+        background: linear-gradient(135deg, #D70018, #ff4d4d);
+        color: #fff;
+        padding: 20px 15px;
+        text-align: center;
+        border-bottom: 3px dashed #fff;
+        position: relative;
+    }
+
+        .v-header h3 {
+            margin: 0;
+            font-size: 22px;
+            font-weight: 900;
+            letter-spacing: 1.5px;
+        }
+
+    .v-body {
+        padding: 20px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .v-desc {
+        color: #444;
+        font-size: 14px;
+        margin-bottom: auto;
+        line-height: 1.5;
+    }
+
+    .v-points {
+        color: #f57f17;
+        font-weight: 800;
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 15px 0;
+        padding: 8px;
+        background: #fff8e1;
+        border-radius: 6px;
+        justify-content: center;
+    }
+
+    .v-btn {
+        display: block;
+        width: 100%;
+        text-align: center;
+        padding: 12px;
+        border-radius: 6px;
+        font-weight: bold;
+        cursor: pointer;
+        border: none;
+        transition: 0.2s;
+        font-size: 14.5px;
+        text-transform: uppercase;
+    }
+
+    .btn-redeem {
+        background: var(--red-cps, #D70018);
+        color: #fff;
+        box-shadow: 0 4px 10px rgba(215,0,24,0.3);
+    }
+
+        .btn-redeem:hover {
+            background: #b00012;
+            transform: scale(1.02);
+        }
+
+    .btn-disabled {
+        background: #e0e0e0;
+        color: #888;
+        cursor: not-allowed;
+    }
+
+    .v-footer {
+        background: #fdfdfd;
+        padding: 10px 15px;
+        font-size: 12px;
+        color: #888;
+        text-align: center;
+        border-top: 1px solid #eee;
+    }
+</style>
+
+<div class="profile-page">
+    <!-- GỌI MENU TRÁI DÙNG CHUNG ĐỒNG BỘ 100% (HIỂN THỊ CẢ HẠNG VÀ NÚT MINI GAME) -->
+    @Html.Partial("~/Views/TaiKhoan/_MenuTaiKhoan.cshtml")
+
+    <!-- NỘI DUNG TRUNG TÂM ĐỔI THƯỞNG BÊN PHẢI -->
+    <div class="profile-content">
+        <div class="reward-header">
+            <h1><i class="fa-solid fa-gift"></i> Trung Tâm Đổi Thưởng</h1>
+            <p style="color: #666; margin-bottom: 18px; font-size: 14px;">Dùng điểm tích lũy của bạn để đổi lấy hàng ngàn ưu đãi hấp dẫn!</p>
+
+            @if (diemHienTai == -1)
+            {
+                <div class="current-points" style="color: #dc3545; border-color: #dc3545; background: #f8d7da; font-size: 14px;">
+                    <i class="fa-solid fa-triangle-exclamation"></i> Vui lòng <a href="@Url.Action("DangNhap", "TaiKhoan")" style="color: #dc3545; text-decoration: underline;">Đăng nhập</a> để xem điểm & đổi thưởng
+                </div>
+            }
+            else
+            {
+                <div class="current-points">
+                    <i class="fa-solid fa-coins" style="color: #f1c40f;"></i> Số điểm khả dụng: <b>@diemHienTai</b>
+                </div>
+            }
+        </div>
+
+        <div class="voucher-grid">
+            @if (Model != null && Model.Any())
+            {
+                foreach (var item in Model)
+                {
+                    <div class="voucher-card">
+                        <div class="v-header">
+                            <h3>@item.MaVoucher</h3>
+                        </div>
+                        <div class="v-body">
+                            <div class="v-desc">
+                                <strong style="font-size: 16px; color: #333;">Giảm @item.PhanTramGiam%</strong>
+                                @if (item.GiaTriToiDa != null)
+                                {<div style="margin-top: 4px;"><i class="fa-solid fa-arrow-down-long" style="color: #28a745;"></i> Tối đa: <b>@String.Format("{0:0,0}", item.GiaTriToiDa).Replace(",", ".")đ</b></div>}
+                                @if (item.DonToiThieu != null)
+                                {<div style="margin-top: 4px;"><i class="fa-solid fa-cart-shopping" style="color: #17a2b8;"></i> Đơn tối thiểu: <b>@String.Format("{0:0,0}", item.DonToiThieu).Replace(",", ".")đ</b></div>}
+                            </div>
+
+                            <div class="v-points">
+                                <i class="fa-solid fa-star"></i> Cần @item.DiemYeuCau Điểm
+                            </div>
+
+                            @if (diemHienTai == -1)
+                            {
+                                <button class="v-btn btn-disabled" onclick="baoLoiChuaDangNhap()">Đăng nhập để đổi</button>
+                            }
+                            else if (diemHienTai < item.DiemYeuCau)
+                            {
+                                <button class="v-btn btn-disabled" onclick="baoLoiThieuDiem()"><i class="fa-solid fa-lock"></i> Chưa đủ điểm</button>
+                            }
+                            else
+                            {
+                                <button class="v-btn btn-redeem" onclick="doiVoucher('@item.MaVoucher')"><i class="fa-solid fa-hand-pointer"></i> ĐỔI NGAY</button>
+                            }
+                        </div>
+                        <div class="v-footer">
+                            <i class="fa-regular fa-clock"></i> HSD: @item.NgayKetThuc.ToString("dd/MM/yyyy HH:mm")<br />
+                            <span style="font-size: 11px;">(Còn lại: @item.SoLuong lượt)</span>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div style="grid-column: 1 / -1; text-align: center; padding: 50px; background: #fff; border-radius: 10px; border: 1px dashed #ccc;">
+                    <i class="fa-solid fa-box-open" style="font-size: 55px; color: #ddd; margin-bottom: 15px;"></i>
+                    <h3 style="color: #666; margin: 0 0 8px 0; font-size: 18px;">Hiện tại chưa có ưu đãi nào trên kệ!</h3>
+                    <p style="color: #999; font-size: 14px; margin: 0;">Bạn hãy quay lại sau nhé.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- SCRIPT GỌI AJAX VÀ SWEETALERT2 -->
+<script>
+    function baoLoiChuaDangNhap() {
+        Swal.fire({
+            title: 'Chưa đăng nhập!',
+            text: 'Vui lòng đăng nhập để có thể đổi ưu đãi nhé.',
+            icon: 'warning',
+            confirmButtonColor: '#D70018',
+            confirmButtonText: 'Đã hiểu'
+        });
+    }
+
+    function baoLoiThieuDiem() {
+        Swal.fire({
+            title: 'Chưa đủ điểm!',
+            text: 'Bạn không đủ điểm để đổi mã này. Hãy mua sắm thêm hoặc chơi Mini Game để tích lũy nhé.',
+            icon: 'info',
+            confirmButtonColor: '#D70018',
+            confirmButtonText: 'Đã hiểu'
+        });
+    }
+
+    function doiVoucher(maVoucher) {
+        Swal.fire({
+            title: 'Xác nhận đổi thưởng',
+            html: "Bạn có chắc chắn dùng điểm để đổi ưu đãi <b>" + maVoucher + "</b> không?",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#D70018',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Đồng ý đổi',
+            cancelButtonText: 'Hủy bỏ',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: 'Đang xử lý...',
+                    text: 'Hệ thống đang lưu mã vào ví của bạn!',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                fetch('@Url.Action("DoiVoucher", "DoiThuong")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'maVoucher=' + encodeURIComponent(maVoucher)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            title: 'Thành công!',
+                            text: data.message,
+                            icon: 'success',
+                            confirmButtonColor: '#28a745',
+                            confirmButtonText: 'Tuyệt vời!'
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Thất bại!',
+                            text: data.message,
+                            icon: 'error',
+                            confirmButtonColor: '#D70018'
+                        });
+                    }
+                })
+                .catch(error => {
+                    Swal.fire({
+                        title: 'Lỗi!',
+                        text: 'Có lỗi xảy ra kết nối hệ thống. Vui lòng thử lại!',
+                        icon: 'error',
+                        confirmButtonColor: '#D70018'
+                    });
+                });
+            }
+        });
+    }
+</script>

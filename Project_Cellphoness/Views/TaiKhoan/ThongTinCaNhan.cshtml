@@ -1,8 +1,10 @@
 ﻿@model Project_Cellphoness.Models.TaiKhoan
+@using Project_Cellphoness.Helpers
 
 @{
     ViewBag.Title = "Hồ sơ cá nhân";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    string hangThanhVien = DiemThuongHelper.LayHangThanhVien(Model.DiemTichLuy);
 }
 
 <style>
@@ -12,73 +14,12 @@
         margin-top: 20px;
     }
 
-    /* MENU TRÁI */
-    .profile-sidebar {
-        width: 280px;
-        background: #fff;
-        border-radius: 10px;
-        padding: 20px 0;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        height: fit-content;
-    }
-
-    .profile-user-info {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        padding: 0 20px 20px 20px;
-        border-bottom: 1px solid #eee;
-        margin-bottom: 10px;
-    }
-
-    .profile-avatar {
-        width: 50px;
-        height: 50px;
-        background: #e9ecef;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 24px;
-        color: #adb5bd;
-    }
-
-    .profile-name {
-        font-weight: bold;
-        color: #333;
-        font-size: 16px;
-    }
-
-    .profile-menu {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-    }
-
-        .profile-menu li a {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 20px;
-            color: #555;
-            text-decoration: none;
-            font-size: 15px;
-            transition: 0.2s;
-        }
-
-            .profile-menu li a:hover, .profile-menu li a.active {
-                background: #fdf5f5;
-                color: var(--red-cps, #D70018);
-                border-right: 3px solid var(--red-cps, #D70018);
-            }
-
-    /* NỘI DUNG PHẢI */
     .profile-content {
         flex: 1;
         background: #fff;
-        border-radius: 10px;
+        border-radius: 12px;
         padding: 30px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
     }
 
     .profile-header {
@@ -118,22 +59,22 @@
         max-width: 400px;
         padding: 10px 15px;
         border: 1px solid #ccc;
-        border-radius: 5px;
+        border-radius: 6px;
         font-size: 14px;
     }
 
         .form-control:focus {
-            border-color: var(--red-cps, #D70018);
+            border-color: #D70018;
             outline: none;
             box-shadow: 0 0 0 3px rgba(215, 0, 24, 0.1);
         }
 
     .btn-save {
-        background: var(--red-cps, #D70018);
+        background: #D70018;
         color: white;
         border: none;
         padding: 12px 30px;
-        border-radius: 5px;
+        border-radius: 6px;
         font-weight: bold;
         cursor: pointer;
         margin-left: 170px;
@@ -141,57 +82,24 @@
     }
 
         .btn-save:hover {
-            background: #c50015;
+            background: #b50014;
+            transform: translateY(-1px);
         }
 
     .alert-success {
         background-color: #d4edda;
         color: #155724;
         padding: 15px;
-        border-radius: 5px;
+        border-radius: 6px;
         margin-bottom: 20px;
         border: 1px solid #c3e6cb;
     }
 </style>
 
 <div class="profile-page">
+    <!-- GỌI MENU DÙNG CHUNG ĐỒNG BỘ 100% -->
+    @Html.Partial("~/Views/TaiKhoan/_MenuTaiKhoan.cshtml")
 
-    <!-- THANH MENU BÊN TRÁI -->
-    <div class="profile-sidebar">
-        <div class="profile-user-info">
-            <div class="profile-avatar">
-                <i class="fa-solid fa-user"></i>
-            </div>
-            <div>
-                <div style="font-size: 12px; color: #888;">Tài khoản của</div>
-                <div class="profile-name">@Model.HoTen</div>
-            </div>
-        </div>
-        <ul class="profile-menu">
-            <li>
-                <a href="@Url.Action("ThongTinCaNhan", "TaiKhoan")" class="active">
-                    <i class="fa-regular fa-id-card"></i> Hồ sơ của tôi
-                </a>
-            </li>
-            <li>
-                <a href="@Url.Action("LichSuDonHang", "TaiKhoan")">
-                    <i class="fa-solid fa-clipboard-list"></i> Đơn mua của tôi
-                </a>
-            </li>
-            <li>
-                <a href="@Url.Action("DoiMatKhau", "TaiKhoan")">
-                    <i class="fa-solid fa-lock"></i> Đổi mật khẩu
-                </a>
-            </li>
-            <li>
-                <a href="@Url.Action("DangXuat", "TaiKhoan")" style="color: #dc3545;">
-                    <i class="fa-solid fa-power-off"></i> Đăng xuất
-                </a>
-            </li>
-        </ul>
-    </div>
-
-    <!-- KHUNG NHẬP LIỆU BÊN PHẢI -->
     <div class="profile-content">
         <div class="profile-header">
             <h2>Hồ sơ của tôi</h2>
@@ -208,12 +116,22 @@
         @using (Html.BeginForm("CapNhatThongTin", "TaiKhoan", FormMethod.Post))
         {
             @Html.AntiForgeryToken()
-            <!-- Mã tài khoản ẩn để truyền về Server -->
             <input type="hidden" name="MaTK" value="@Model.MaTK" />
 
             <div class="form-group">
+                <label>Hạng Thành Viên</label>
+                <input type="text" class="form-control" value="@hangThanhVien" readonly style="background-color: #fdf5f5; color: #D70018; font-weight: bold; border-color: #ffcdd2; cursor: not-allowed;" />
+            </div>
+
+            <div class="form-group">
+                <label>Điểm Có Sẵn</label>
+                <input type="text" class="form-control" value="@(Model.DiemHienTai ?? 0) Điểm (Dùng để đổi Voucher & Chơi Mini Game)" readonly style="background-color: #f8f9fa; color: #28a745; font-weight: bold; cursor: not-allowed;" />
+            </div>
+
+            <hr style="border: 0; border-top: 1px dashed #eee; margin: 20px 0;" />
+
+            <div class="form-group">
                 <label>Địa chỉ Email</label>
-                <!-- Email không cho phép sửa, dùng readonly -->
                 <input type="email" class="form-control" value="@Model.Email" readonly style="background-color: #f8f9fa; cursor: not-allowed;" />
             </div>
 

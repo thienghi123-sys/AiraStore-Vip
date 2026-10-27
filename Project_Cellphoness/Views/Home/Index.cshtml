@@ -6,7 +6,7 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<style>
+<<style>
     /* CSS Slider và các nút cũ giữ nguyên để không vỡ layout */
     .slider-container {
         position: relative;
@@ -67,13 +67,14 @@
         animation-duration: 1.5s;
     }
 
+    /* ĐÃ SỬA: Dùng @@keyframes và 0% / 100% để không bị lỗi Razor */
     @@keyframes fade {
-        from {
-            opacity: .4
+        0% {
+            opacity: 0.4;
         }
 
-        to {
-            opacity: 1
+        100% {
+            opacity: 1;
         }
     }
 
@@ -111,6 +112,85 @@
         margin-bottom: 30px;
         box-shadow: 0 2px 12px rgba(0,0,0,0.06);
     }
+
+    /* ======================================================= */
+    /* CSS MỚI CHO THƯƠNG HIỆU NỔI BẬT (QUICK LINKS) */
+    /* ======================================================= */
+    .brand-list-container {
+        display: flex;
+        gap: 20px;
+        overflow-x: auto;
+        padding: 10px 5px;
+        scroll-behavior: smooth;
+    }
+
+        /* Ẩn thanh cuộn (scrollbar) để giao diện đẹp hơn trên mobile */
+        .brand-list-container::-webkit-scrollbar {
+            display: none;
+        }
+
+    .brand-circle-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-decoration: none;
+        color: #333;
+        min-width: 75px;
+        cursor: pointer;
+        transition: transform 0.2s ease;
+    }
+
+        .brand-circle-item:hover {
+            transform: translateY(-5px);
+        }
+
+    .brand-circle {
+        width: 65px;
+        height: 65px;
+        border-radius: 50%;
+        background-color: #fff;
+        border: 1px solid #e0e0e0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        transition: 0.3s ease;
+        overflow: hidden;
+    }
+
+    .brand-circle-item:hover .brand-circle {
+        border-color: #D70018;
+        box-shadow: 0 5px 15px rgba(215,0,24,0.15);
+    }
+
+    .brand-circle img {
+        width: 75%;
+        height: 75%;
+        object-fit: contain;
+    }
+
+    /* Nếu không có ảnh logo, dùng chữ in đậm thay thế */
+    .brand-text-logo {
+        font-weight: 900;
+        font-size: 13px;
+        text-transform: uppercase;
+        color: #555;
+    }
+
+    .brand-circle-item:hover .brand-text-logo {
+        color: #D70018;
+    }
+
+    .brand-name {
+        font-size: 13px;
+        margin-top: 8px;
+        font-weight: 600;
+        text-align: center;
+        white-space: nowrap;
+        color: #444;
+    }
+
+    /* ======================================================= */
 
     .block-goiy {
         background: linear-gradient(180deg, #e3f2fd 0%, #ffffff 100%);
@@ -272,6 +352,45 @@
     }
 </div>
 
+<!-- THƯƠNG HIỆU NỔI BẬT (QUICK LINKS) -->
+<div class="cps-block" style="background: transparent; box-shadow: none; padding: 0 0 10px 0; margin-bottom: 20px;">
+    <h2 class="section-title" style="font-size: 20px;">Thương hiệu nổi bật</h2>
+    <div class="brand-list-container">
+
+        <!-- Nút "Tất cả" (Khớp 100% với ảnh tham khảo) -->
+        <a href="/" class="brand-circle-item">
+            <div class="brand-circle" style="border: 2px solid #D70018;">
+                <i class="fa-solid fa-border-all" style="font-size: 24px; color: #D70018;"></i>
+            </div>
+            <span class="brand-name" style="color: #D70018;">Tất cả</span>
+        </a>
+
+        <!-- Danh sách các hãng (Lấy tự động từ CSDL) -->
+        <!-- Danh sách các hãng (Lấy tự động từ CSDL) -->
+        @if (ViewBag.DanhSachHang != null)
+        {
+            foreach (var hang in ViewBag.DanhSachHang)
+            {
+                <a href="/Home/SanPhamTheoHang/@hang.MaHang" class="brand-circle-item">
+                    <div class="brand-circle">
+                        @if (!string.IsNullOrEmpty(hang.Logo))
+                        {
+                            <!-- Đã thêm Url.Content để web hiểu dấu ~ -->
+                            <img src="@Url.Content(hang.Logo)" alt="@hang.TenHang" onerror="this.src='https://via.placeholder.com/50?text=Loi+Anh'" />
+                        }
+                        else
+                        {
+                            <!-- Tự động hiển thị tên nếu Admin chưa tải ảnh Logo lên -->
+                            <span class="brand-text-logo">@hang.TenHang</span>
+                        }
+                    </div>
+                    <span class="brand-name">@hang.TenHang</span>
+                </a>
+            }
+        }
+    </div>
+</div>
+
 <!--  BỘ LỌC TỔNG HỢP: HÃNG (QĐ03) & GIÁ (QĐ04) -->
 <div style="background: #fdf5f5; padding: 20px; border-radius: 8px; border: 1px solid #ffcdd2; margin-bottom: 25px;">
     <form id="formLocSanPham" action="@Url.Action("Index", "Home")" method="get">
@@ -285,7 +404,7 @@
             {
                 foreach (var hang in ViewBag.DanhSachHang)
                 {
-                    
+
                     var isChecked = ViewBag.SelectedHangs != null && ((List<int>)ViewBag.SelectedHangs).Contains(hang.MaHang) ? "checked" : "";
 
                     <label style="cursor: pointer; display: flex; align-items: center; gap: 8px; background: #fff; padding: 6px 12px; border: 1px solid #ddd; border-radius: 20px; font-size: 14px; transition: 0.2s;">
@@ -467,20 +586,20 @@
 
     // 2. Script bắt lỗi Nhập giá trị lọc (QĐ04)
     document.getElementById('formLocSanPham').addEventListener('submit', function (event) {
-        
+
         var minInput = document.getElementById('minPrice').value;
         var maxInput = document.getElementById('maxPrice').value;
 
-        
+
         if (minInput !== "" && maxInput !== "") {
             var minPrice = parseFloat(minInput);
             var maxPrice = parseFloat(maxInput);
 
             // Kiểm tra quy định QĐ04
             if (maxPrice < minPrice) {
-                
+
                 event.preventDefault();
-               
+
                 alert('Lỗi nhập liệu: Mức giá "Đến" bắt buộc phải lớn hơn hoặc bằng mức giá "Từ"!');
             }
         }

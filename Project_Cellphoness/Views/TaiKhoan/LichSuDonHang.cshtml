@@ -1,127 +1,705 @@
 ﻿@model IEnumerable<Project_Cellphoness.Models.DonHang>
 
 @{
-    ViewBag.Title = "Lịch sử mua hàng";
+    ViewBag.Title = "Đơn mua của tôi";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div style="max-width: 1100px; margin: 30px auto; background: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
-
-    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--red-cps); padding-bottom: 10px; margin-bottom: 20px;">
-        <h2 style="color: #333; margin: 0;"><i class="fa-solid fa-clock-rotate-left"></i> LỊCH SỬ ĐƠN HÀNG CỦA BẠN</h2>
-        <a href="/" style="color: var(--red-cps); font-weight: bold; text-decoration: none;"><i class="fa-solid fa-arrow-left"></i> Tiếp tục mua sắm</a>
-    </div>
-
-    @if (TempData["ThongBaoHuy"] != null)
-    {
-        <div style="background: #e8f5e9; color: #2e7d32; padding: 15px; border-radius: 5px; margin-bottom: 20px; font-weight: bold; border: 1px solid #c8e6c9;">
-            <i class="fa-solid fa-circle-check"></i> @TempData["ThongBaoHuy"]
-        </div>
-    }
-
-    @if (Model == null || !Model.Any())
-    {
-        <div style="text-align: center; padding: 40px 0;">
-            <h3 style="color: #666;">Bạn chưa có đơn hàng nào!</h3>
-        </div>
-    }
-    else
-    {
-        <table style="width: 100%; border-collapse: collapse; text-align: left;">
-            <thead>
-                <tr style="background-color: #f8f9fa; color: #333; border-bottom: 2px solid #ddd;">
-                    <th style="padding: 15px 10px;">Mã ĐH</th>
-                    <th style="padding: 15px 10px;">Ngày đặt</th>
-                    <th style="padding: 15px 10px;">Tổng tiền</th>
-                    <th style="padding: 15px 10px;">Trạng thái</th>
-                    <th style="padding: 15px 10px; text-align: center;">Thao tác</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in Model)
-                {
-                    <tr style="border-bottom: 1px solid #eee;">
-                        <td style="padding: 15px 10px; font-weight: bold; color: var(--red-cps);">#@item.MaDH</td>
-                        <td style="padding: 15px 10px; font-size: 14px; color: #555;">
-                            @(item.NgayDat.HasValue ? item.NgayDat.Value.ToString("dd/MM/yyyy HH:mm") : "")
-                        </td>
-                        <td style="padding: 15px 10px; font-weight: bold; color: var(--red-cps);">
-                            @String.Format("{0:0,0}", item.TongTien).Replace(",", ".") đ
-                        </td>
-                        <td style="padding: 15px 10px; font-size: 13px; font-weight: bold; max-width: 250px;">
-                            @if (string.IsNullOrEmpty(item.TrangThaiDH))
-                            {
-                                <span style="color: #007bff;">Chờ duyệt</span>
-                            }
-                            else if (item.TrangThaiDH.Contains("Đã hủy"))
-                            {
-                                <span style="color: #dc3545;">@item.TrangThaiDH</span>
-                            }
-                            else
-                            {
-                                <span style="color: #28a745;">@item.TrangThaiDH</span>
-                            }
-                        </td>
-                        <td style="padding: 15px 10px; text-align: center;">
-                            <!-- LỚP BẢO VỆ FRONTEND: Ẩn nút nếu đang giao hàng, hoàn thành hoặc đã hủy -->
-                            @if (string.IsNullOrEmpty(item.TrangThaiDH) || (!item.TrangThaiDH.Contains("Đã hủy") && item.TrangThaiDH != "Đang giao hàng" && item.TrangThaiDH != "Hoàn thành"))
-                            {
-                                <a href="javascript:void(0);"
-                                   onclick="yeuCauHuyDon(@item.MaDH);"
-                                   style="background: #dc3545; color: white; padding: 8px 15px; border-radius: 5px; text-decoration: none; font-weight: bold; font-size: 13px; display: inline-block;">
-                                    <i class="fa-solid fa-xmark"></i> Hủy đơn
-                                </a>
-                            }
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    }
-</div>
-
-<div id="customModalHuyDon" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; font-family: Arial, sans-serif;">
-    <div style="background:#fff; padding:25px; border-radius:12px; width:100%; max-width:450px; box-shadow:0 5px 25px rgba(0,0,0,0.2); text-align:left; position:relative; box-sizing:border-box;">
-
-        <h3 style="color:#dc3545; margin-top:0; font-size:18px; font-weight:bold; border-bottom:1px solid #eee; padding-bottom:12px; display:flex; align-items:center; gap:8px;">
-            <i class="fa-solid fa-circle-exclamation"></i> Lý do hủy đơn hàng
-        </h3>
-
-        <p style="color:#555; font-size:14px; margin-bottom:15px; line-height:1.4;">
-            Vui lòng cho biết lý do bạn muốn hủy đơn hàng này để hệ thống ghi nhận và cải thiện dịch vụ:
-        </p>
-
-        <input type="hidden" id="modalMaDH" />
-
-        <textarea id="modalLyDo" rows="4" style="width:100%; padding:12px; border:1px solid #ccc; border-radius:6px; resize:none; box-sizing:border-box; font-family:inherit; font-size:14px; outline:none; transition:0.2s;" placeholder="Nhập lý do hủy tại đây... (Ví dụ: Đổi ý không mua nữa, đặt nhầm màu sản phẩm...)"></textarea>
-
-        <div id="modalError" style="color:#dc3545; font-size:13px; font-weight:bold; margin-top:8px; display:none;">
-            * Bạn phải nhập lý do thì mới có thể hủy đơn!
-        </div>
-
-        <div style="text-align:right; margin-top:20px; display:flex; gap:10px; justify-content:flex-end;">
-            <button onclick="dongModalHuyDon()" style="background:#e9ecef; color:#495057; border:none; padding:10px 18px; border-radius:6px; cursor:pointer; font-weight:bold; font-size:14px; transition:0.2s;">
-                Đóng
-            </button>
-            <button onclick="xacNhanHuyDonModal()" style="background:#dc3545; color:#fff; border:none; padding:10px 18px; border-radius:6px; cursor:pointer; font-weight:bold; font-size:14px; transition:0.2s;">
-                Xác nhận hủy
-            </button>
-        </div>
-    </div>
-</div>
-
 <style>
-    #customModalHuyDon button:hover {
-        opacity: 0.9;
+    .profile-page {
+        display: flex;
+        gap: 20px;
+        margin-top: 20px;
     }
 
-    #modalLyDo:focus {
-        border-color: #dc3545;
-        box-shadow: 0 0 5px rgba(220, 53, 69, 0.2);
+    .profile-content {
+        flex: 1;
+        background: #fff;
+        border-radius: 12px;
+        padding: 30px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        min-width: 0;
+    }
+
+    .order-header-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 15px;
+        margin-bottom: 20px;
+    }
+
+        .order-header-bar h2 {
+            color: #333;
+            margin: 0 0 5px 0;
+            font-size: 20px;
+        }
+
+        .order-header-bar p {
+            margin: 0;
+            color: #666;
+            font-size: 14px;
+        }
+
+    .btn-back-shop {
+        color: var(--red-cps, #D70018);
+        font-weight: bold;
+        text-decoration: none;
+        font-size: 14px;
+        padding: 8px 16px;
+        border-radius: 20px;
+        background: #fdf2f3;
+        transition: 0.25s;
+    }
+
+        .btn-back-shop:hover {
+            background: var(--red-cps, #D70018);
+            color: #fff;
+            transform: translateX(-3px);
+        }
+
+    /* THANH LỌC TAB TRẠNG THÁI HIỆN ĐẠI */
+    .order-filter-tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        overflow-x: auto;
+        padding-bottom: 5px;
+    }
+
+    .filter-tab-btn {
+        background: #f4f6f8;
+        color: #555;
+        border: 1px solid #e9ecef;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 13.5px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.25s;
+        white-space: nowrap;
+    }
+
+        .filter-tab-btn:hover {
+            border-color: #D70018;
+            color: #D70018;
+        }
+
+        .filter-tab-btn.active {
+            background: #D70018;
+            color: #fff;
+            border-color: #D70018;
+            box-shadow: 0 3px 10px rgba(215, 0, 24, 0.25);
+        }
+
+    /* BẢNG ĐƠN HÀNG CÓ HIỆU ỨNG HOVER CLICK */
+    .order-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+    }
+
+        .order-table thead tr {
+            background-color: #f8f9fa;
+            color: #333;
+            border-bottom: 2px solid #eaeaea;
+        }
+
+        .order-table th {
+            padding: 14px 12px;
+            font-size: 13px;
+            text-transform: uppercase;
+            color: #666;
+            letter-spacing: 0.4px;
+        }
+
+    .order-row-item {
+        border-bottom: 1px solid #f0f0f0;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+        .order-row-item:hover {
+            background-color: #fff8f8;
+            transform: scale(1.003);
+            box-shadow: 0 3px 10px rgba(215, 0, 24, 0.06);
+        }
+
+    .order-table td {
+        padding: 16px 12px;
+        vertical-align: middle;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 12.5px;
+        font-weight: 700;
+    }
+
+    .status-pending {
+        background: #e7f1ff;
+        color: #007bff;
+    }
+
+    .status-shipping {
+        background: #fff3cd;
+        color: #d39e00;
+    }
+
+    .status-cancel {
+        background: #f8d7da;
+        color: #dc3545;
+    }
+
+    .status-success {
+        background: #d4edda;
+        color: #28a745;
+    }
+
+    .btn-view-detail {
+        background: #fff;
+        color: #D70018;
+        border: 1.5px solid #D70018;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-weight: 700;
+        font-size: 12.5px;
+        cursor: pointer;
+        transition: 0.2s;
+        margin-right: 6px;
+    }
+
+        .btn-view-detail:hover {
+            background: #D70018;
+            color: #fff;
+        }
+
+    .btn-cancel-order {
+        background: #dc3545;
+        color: white;
+        padding: 7px 13px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: bold;
+        font-size: 12.5px;
+        display: inline-block;
+        transition: 0.2s;
+        border: none;
+        cursor: pointer;
+    }
+
+        .btn-cancel-order:hover {
+            background: #b02a37;
+        }
+
+    /* ============================================================== */
+    /* POPUP XEM CHI TIẾT ĐƠN HÀNG & THANH TIẾN TRÌNH (STEPPER) */
+    /* ============================================================== */
+    .order-detail-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.65);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 15000;
+        backdrop-filter: blur(4px);
+    }
+
+    .order-detail-modal {
+        background: #fff;
+        width: 720px;
+        max-width: 95%;
+        max-height: 90vh;
+        border-radius: 18px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        animation: modalSlideUp 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+
+    @@keyframes modalSlideUp {
+        0% {
+            opacity: 0;
+            transform: translateY(40px) scale(0.9);
+        }
+
+        100% {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    .od-header {
+        background: linear-gradient(135deg, #D70018, #ff4b2b);
+        color: #fff;
+        padding: 18px 25px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+        .od-header h3 {
+            margin: 0;
+            font-size: 19px;
+            font-weight: 800;
+        }
+
+    .od-close {
+        font-size: 22px;
+        cursor: pointer;
+        color: #fff;
+        transition: 0.2s;
+    }
+
+        .od-close:hover {
+            transform: rotate(90deg);
+        }
+
+    .od-body {
+        padding: 25px;
+        overflow-y: auto;
+        flex: 1;
+    }
+
+    /* Thanh tiến trình 4 bước (Order Tracking Stepper) */
+    .order-stepper {
+        display: flex;
+        justify-content: space-between;
+        position: relative;
+        margin: 10px 0 30px 0;
+        padding: 0 10px;
+    }
+
+        .order-stepper::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 45px;
+            right: 45px;
+            height: 4px;
+            background: #e9ecef;
+            z-index: 1;
+        }
+
+    .step-item {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 110px;
+        text-align: center;
+    }
+
+    .step-circle {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background: #e9ecef;
+        color: #888;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 17px;
+        margin-bottom: 8px;
+        border: 3px solid #fff;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        transition: 0.3s;
+    }
+
+    .step-label {
+        font-size: 12px;
+        font-weight: 700;
+        color: #777;
+    }
+
+    .step-item.active .step-circle {
+        background: #28a745;
+        color: #fff;
+        box-shadow: 0 0 0 4px rgba(40, 167, 69, 0.2);
+    }
+
+    .step-item.active .step-label {
+        color: #28a745;
+        font-weight: 800;
+    }
+
+    .step-item.canceled .step-circle {
+        background: #dc3545;
+        color: #fff;
+    }
+
+    /* Danh sách sản phẩm trong đơn */
+    .od-product-list {
+        border: 1px solid #eee;
+        border-radius: 12px;
+        overflow: hidden;
+        margin-bottom: 20px;
+    }
+
+    .od-product-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 18px;
+        border-bottom: 1px solid #f1f3f5;
+        background: #fff;
+        transition: 0.2s;
+    }
+
+        .od-product-item:last-child {
+            border-bottom: none;
+        }
+
+        .od-product-item:hover {
+            background: #fdfdfd;
+        }
+
+    .od-prod-left {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .od-prod-img {
+        width: 60px;
+        height: 60px;
+        object-fit: contain;
+        border-radius: 8px;
+        border: 1px solid #eee;
+        padding: 4px;
+        background: #fff;
+    }
+
+    .od-prod-name {
+        font-weight: 800;
+        color: #222;
+        font-size: 14.5px;
+        margin-bottom: 4px;
+        text-decoration: none;
+        display: block;
+    }
+
+        .od-prod-name:hover {
+            color: #D70018;
+        }
+
+    .od-prod-meta {
+        font-size: 13px;
+        color: #777;
+    }
+
+    .od-prod-right {
+        text-align: right;
+    }
+
+    .od-prod-subtotal {
+        font-size: 15px;
+        font-weight: 800;
+        color: #D70018;
+        display: block;
+        margin-bottom: 6px;
+    }
+
+    .btn-re-buy {
+        display: inline-block;
+        padding: 5px 12px;
+        background: #fdf2f3;
+        color: #D70018;
+        border-radius: 15px;
+        font-size: 12px;
+        font-weight: 700;
+        text-decoration: none;
+        transition: 0.2s;
+    }
+
+        .btn-re-buy:hover {
+            background: #D70018;
+            color: #fff;
+        }
+
+    .od-summary-box {
+        background: #f8f9fa;
+        padding: 16px 20px;
+        border-radius: 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border: 1px solid #e9ecef;
     }
 </style>
 
+<div class="profile-page">
+    <!-- MENU TRÁI DÙNG CHUNG ĐỒNG BỘ 100% -->
+    @Html.Partial("~/Views/TaiKhoan/_MenuTaiKhoan.cshtml")
+
+    <!-- NỘI DUNG ĐƠN MUA BÊN PHẢI -->
+    <div class="profile-content">
+        <div class="order-header-bar">
+            <div>
+                <h2><i class="fa-solid fa-clipboard-list" style="color: #D70018;"></i> Đơn mua của tôi</h2>
+                <p>Nhấn vào bất kỳ đơn hàng nào để xem chi tiết sản phẩm và tiến trình giao hàng</p>
+            </div>
+            <a href="/" class="btn-back-shop">
+                <i class="fa-solid fa-arrow-left"></i> Tiếp tục mua sắm
+            </a>
+        </div>
+
+        @if (TempData["ThongBaoHuy"] != null)
+        {
+            <div style="background: #e8f5e9; color: #2e7d32; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-weight: bold; border: 1px solid #c8e6c9;">
+                <i class="fa-solid fa-circle-check"></i> @TempData["ThongBaoHuy"]
+            </div>
+        }
+
+        <!-- THANH LỌC TAB TRẠNG THÁI ĐƠN HÀNG -->
+        <div class="order-filter-tabs">
+            <button class="filter-tab-btn active" onclick="locDonHangTheoTab('all', this)">Tất cả (@(Model != null ? Model.Count() : 0))</button>
+            <button class="filter-tab-btn" onclick="locDonHangTheoTab('cho-duyet', this)">Chờ duyệt</button>
+            <button class="filter-tab-btn" onclick="locDonHangTheoTab('dang-giao', this)">Đang giao hàng</button>
+            <button class="filter-tab-btn" onclick="locDonHangTheoTab('hoan-thanh', this)">Hoàn thành</button>
+            <button class="filter-tab-btn" onclick="locDonHangTheoTab('da-huy', this)">Đã hủy</button>
+        </div>
+
+        @if (Model == null || !Model.Any())
+        {
+            <div style="text-align: center; padding: 50px 0;">
+                <i class="fa-solid fa-box-open" style="font-size: 55px; color: #ddd; margin-bottom: 15px;"></i>
+                <h3 style="color: #666; margin: 0 0 10px 0;">Bạn chưa có đơn hàng nào!</h3>
+                <p style="color: #999; font-size: 14px;">Hãy dạo một vòng AiraStore để rinh ngay siêu phẩm yêu thích nhé.</p>
+            </div>
+        }
+        else
+        {
+            <div style="overflow-x: auto;">
+                <table class="order-table">
+                    <thead>
+                        <tr>
+                            <th>Mã ĐH</th>
+                            <th>Ngày đặt</th>
+                            <th>Tổng tiền</th>
+                            <th>Trạng thái</th>
+                            <th style="text-align: center;">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="orderTableBody">
+                        @foreach (var item in Model)
+                        {
+                            string stRaw = string.IsNullOrEmpty(item.TrangThaiDH) ? "Chờ duyệt" : item.TrangThaiDH;
+                            string tabKey = "cho-duyet";
+                            if (stRaw.Contains("Đã hủy")) { tabKey = "da-huy"; }
+                            else if (stRaw == "Hoàn thành") { tabKey = "hoan-thanh"; }
+                            else if (stRaw.Contains("giao")) { tabKey = "dang-giao"; }
+
+                            <tr class="order-row-item" data-status="@tabKey" onclick="xemChiTietDonHang(@item.MaDH)">
+                                <td style="font-weight: 800; color: var(--red-cps, #D70018); font-size: 15px;">
+                                    #@item.MaDH
+                                </td>
+                                <td style="font-size: 14px; color: #555;">
+                                    <i class="fa-regular fa-calendar" style="color:#999; margin-right:4px;"></i>
+                                    @(item.NgayDat.HasValue ? item.NgayDat.Value.ToString("dd/MM/yyyy HH:mm") : "")
+                                </td>
+                                <td style="font-weight: 800; color: var(--red-cps, #D70018); font-size: 15px;">
+                                    @String.Format("{0:0,0}", item.TongTien).Replace(",", ".") đ
+                                </td>
+                                <td style="max-width: 260px;">
+                                    @if (tabKey == "cho-duyet")
+                                    {
+                                        <span class="status-badge status-pending"><i class="fa-regular fa-clock"></i> @stRaw</span>
+                                    }
+                                    else if (tabKey == "da-huy")
+                                    {
+                                        <span class="status-badge status-cancel"><i class="fa-solid fa-ban"></i> @stRaw</span>
+                                    }
+                                    else if (tabKey == "dang-giao")
+                                    {
+                                        <span class="status-badge status-shipping"><i class="fa-solid fa-truck-fast"></i> @stRaw</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="status-badge status-success"><i class="fa-solid fa-circle-check"></i> @stRaw</span>
+                                    }
+                                </td>
+                                <td style="text-align: center;" onclick="event.stopPropagation();">
+                                    <button type="button" class="btn-view-detail" onclick="xemChiTietDonHang(@item.MaDH)">
+                                        <i class="fa-regular fa-eye"></i> Chi tiết
+                                    </button>
+
+                                    @if (string.IsNullOrEmpty(item.TrangThaiDH) || (!item.TrangThaiDH.Contains("Đã hủy") && item.TrangThaiDH != "Đang giao hàng" && item.TrangThaiDH != "Hoàn thành"))
+                                    {
+                                        <button type="button" class="btn-cancel-order" onclick="yeuCauHuyDon(@item.MaDH);">
+                                            <i class="fa-solid fa-xmark"></i> Hủy đơn
+                                        </button>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- ============================================================== -->
+<!-- POPUP CHI TIẾT ĐƠN HÀNG & SẢN PHẨM TRONG ĐƠN -->
+<!-- ============================================================== -->
+<div id="modalChiTietDonHang" class="order-detail-overlay" onclick="if(event.target === this) dongChiTietDonHang()">
+    <div class="order-detail-modal">
+        <div class="od-header">
+            <h3><i class="fa-solid fa-box-open"></i> Chi Tiết Đơn Hàng <span id="odMaDH">#0</span></h3>
+            <i class="fa-solid fa-xmark od-close" onclick="dongChiTietDonHang()"></i>
+        </div>
+        <div class="od-body">
+            <!-- Thanh tiến trình vận chuyển -->
+            <div id="odStepper" class="order-stepper"></div>
+
+            <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:15px; font-size:13.5px; color:#555; background:#fdf5f5; padding:12px 16px; border-radius:10px; border:1px solid #ffccd2;">
+                <div><i class="fa-solid fa-user" style="color:#D70018;"></i> Người đặt: <b id="odNguoiNhan" style="color:#222;"></b></div>
+                <div><i class="fa-regular fa-clock" style="color:#D70018;"></i> Ngày đặt: <b id="odNgayDat" style="color:#222;"></b></div>
+                <div><i class="fa-solid fa-circle-info" style="color:#D70018;"></i> Trạng thái: <b id="odTrangThaiText" style="color:#D70018;"></b></div>
+            </div>
+
+            <div style="font-weight: 800; color: #333; margin-bottom: 10px; font-size: 15px;">
+                <i class="fa-solid fa-mobile-screen-button" style="color:#D70018;"></i> Danh sách sản phẩm trong đơn:
+            </div>
+
+            <div id="odProductList" class="od-product-list">
+                <!-- JS tự động đổ danh sách sản phẩm vào đây -->
+            </div>
+
+            <div class="od-summary-box">
+                <span style="font-size: 14px; color: #666; font-weight: 600;">Tổng cộng thanh toán:</span>
+                <span id="odTongTien" style="font-size: 22px; font-weight: 900; color: #D70018;">0 đ</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL NHẬP LÝ DO HỦY ĐƠN -->
+<div id="customModalHuyDon" style="display:none; position:fixed; z-index:16000; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center;">
+    <div style="background:#fff; padding:25px; border-radius:12px; width:100%; max-width:450px; box-shadow:0 5px 25px rgba(0,0,0,0.2); text-align:left;">
+        <h3 style="color:#dc3545; margin-top:0; font-size:18px; font-weight:bold; border-bottom:1px solid #eee; padding-bottom:12px; display:flex; align-items:center; gap:8px;">
+            <i class="fa-solid fa-circle-exclamation"></i> Lý do hủy đơn hàng
+        </h3>
+        <p style="color:#555; font-size:14px; margin-bottom:15px; line-height:1.4;">
+            Vui lòng cho biết lý do bạn muốn hủy đơn hàng này để hệ thống ghi nhận và cải thiện dịch vụ:
+        </p>
+        <input type="hidden" id="modalMaDH" />
+        <textarea id="modalLyDo" rows="4" style="width:100%; padding:12px; border:1px solid #ccc; border-radius:6px; resize:none; box-sizing:border-box; font-size:14px; outline:none;" placeholder="Nhập lý do hủy tại đây..."></textarea>
+        <div id="modalError" style="color:#dc3545; font-size:13px; font-weight:bold; margin-top:8px; display:none;">
+            * Bạn phải nhập lý do thì mới có thể hủy đơn!
+        </div>
+        <div style="text-align:right; margin-top:20px; display:flex; gap:10px; justify-content:flex-end;">
+            <button onclick="dongModalHuyDon()" style="background:#e9ecef; color:#495057; border:none; padding:10px 18px; border-radius:6px; cursor:pointer; font-weight:bold;">Đóng</button>
+            <button onclick="xacNhanHuyDonModal()" style="background:#dc3545; color:#fff; border:none; padding:10px 18px; border-radius:6px; cursor:pointer; font-weight:bold;">Xác nhận hủy</button>
+        </div>
+    </div>
+</div>
+
 <script>
+    // 1. Lọc đơn hàng theo Tab
+    function locDonHangTheoTab(statusKey, btn) {
+        document.querySelectorAll('.filter-tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        document.querySelectorAll('.order-row-item').forEach(row => {
+            if (statusKey === 'all' || row.getAttribute('data-status') === statusKey) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+
+    // 2. Mở Popup xem chi tiết sản phẩm trong đơn hàng
+    function xemChiTietDonHang(maDH) {
+        const modal = document.getElementById('modalChiTietDonHang');
+        const listBox = document.getElementById('odProductList');
+        const stepper = document.getElementById('odStepper');
+
+        document.getElementById('odMaDH').innerText = '#' + maDH;
+        listBox.innerHTML = '<div style="padding:30px; text-align:center; color:#888;"><i class="fa-solid fa-spinner fa-spin"></i> Đang tải chi tiết sản phẩm...</div>';
+        modal.style.display = 'flex';
+
+        fetch('/TaiKhoan/ChiTietDonHangJson?maDH=' + maDH)
+            .then(res => res.json())
+            .then(data => {
+                if (!data.success) {
+                    listBox.innerHTML = `<div style="padding:20px; color:#dc3545; text-align:center;">${data.message}</div>`;
+                    return;
+                }
+
+                document.getElementById('odNguoiNhan').innerText = data.nguoiNhan + (data.soDienThoai ? ' (' + data.soDienThoai + ')' : '');
+                document.getElementById('odNgayDat').innerText = data.ngayDat;
+                document.getElementById('odTrangThaiText').innerText = data.trangThai;
+                document.getElementById('odTongTien').innerText = data.tongTien.toLocaleString('vi-VN') + ' đ';
+
+                // Render Thanh tiến trình 4 bước (Stepper)
+                let st = data.trangThai.toLowerCase();
+                let isCancel = st.includes('hủy');
+                let stepLevel = 1; // 1: Đặt hàng, 2: Đã xác nhận, 3: Đang giao, 4: Hoàn thành
+                if (st.includes('xác nhận') || st.includes('duyệt')) stepLevel = 2;
+                if (st.includes('giao')) stepLevel = 3;
+                if (st.includes('hoàn thành')) stepLevel = 4;
+
+                if (isCancel) {
+                    stepper.innerHTML = `
+                        <div class="step-item active"><div class="step-circle"><i class="fa-solid fa-file-invoice"></i></div><span class="step-label">Đã đặt đơn</span></div>
+                        <div class="step-item canceled"><div class="step-circle"><i class="fa-solid fa-ban"></i></div><span class="step-label" style="color:#dc3545;">Đơn đã hủy</span></div>
+                    `;
+                } else {
+                    stepper.innerHTML = `
+                        <div class="step-item ${stepLevel >= 1 ? 'active' : ''}"><div class="step-circle"><i class="fa-solid fa-receipt"></i></div><span class="step-label">Đặt hàng</span></div>
+                        <div class="step-item ${stepLevel >= 2 ? 'active' : ''}"><div class="step-circle"><i class="fa-solid fa-box"></i></div><span class="step-label">Chờ xử lý</span></div>
+                        <div class="step-item ${stepLevel >= 3 ? 'active' : ''}"><div class="step-circle"><i class="fa-solid fa-truck-fast"></i></div><span class="step-label">Đang giao</span></div>
+                        <div class="step-item ${stepLevel >= 4 ? 'active' : ''}"><div class="step-circle"><i class="fa-solid fa-star"></i></div><span class="step-label">Hoàn thành</span></div>
+                    `;
+                }
+
+                // Render danh sách sản phẩm
+                if (data.items && data.items.length > 0) {
+                    listBox.innerHTML = data.items.map(sp => `
+                        <div class="od-product-item">
+                            <div class="od-prod-left">
+                                <img src="${sp.HinhAnh}" class="od-prod-img" onerror="this.src='https://via.placeholder.com/60'" />
+                                <div>
+                                    <a href="/Home/Details/${sp.MaSP}" class="od-prod-name">${sp.TenSP}</a>
+                                    <div class="od-prod-meta">Đơn giá: <b>${sp.DonGia.toLocaleString('vi-VN')} đ</b> &times; Số lượng: <b>${sp.SoLuong}</b></div>
+                                </div>
+                            </div>
+                            <div class="od-prod-right">
+                                <span class="od-prod-subtotal">${sp.ThanhTien.toLocaleString('vi-VN')} đ</span>
+                                <a href="/Home/Details/${sp.MaSP}" class="btn-re-buy">
+                                    <i class="fa-solid fa-rotate-right"></i> ${stepLevel === 4 ? 'Mua lại / Đánh giá' : 'Xem sản phẩm'}
+                                </a>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    listBox.innerHTML = '<div style="padding:20px; text-align:center; color:#888;">Không có dữ liệu chi tiết sản phẩm cho đơn này.</div>';
+                }
+            })
+            .catch(() => {
+                listBox.innerHTML = '<div style="padding:20px; color:#dc3545; text-align:center;">Lỗi kết nối máy chủ khi tải chi tiết đơn hàng!</div>';
+            });
+    }
+
+    function dongChiTietDonHang() {
+        document.getElementById('modalChiTietDonHang').style.display = 'none';
+    }
+
+    // 3. Hủy đơn hàng
     function yeuCauHuyDon(maDH) {
         document.getElementById("modalMaDH").value = maDH;
         document.getElementById("modalLyDo").value = "";

@@ -61,6 +61,7 @@
           <Property Name="HoTenNhan" Type="nvarchar" MaxLength="100" Nullable="false" />
           <Property Name="SDTNhan" Type="varchar" MaxLength="15" Nullable="false" />
           <Property Name="DiaChiNhan" Type="nvarchar" MaxLength="255" Nullable="false" />
+          <Property Name="DaCongDiem" Type="bit" />
         </EntityType>
         <EntityType Name="HangSanXuat">
           <Key>
@@ -82,6 +83,8 @@
           <Property Name="NgayBatDau" Type="datetime" Nullable="false" />
           <Property Name="NgayKetThuc" Type="datetime" Nullable="false" />
           <Property Name="SoLuong" Type="int" Nullable="false" />
+          <Property Name="HienThiDoiThuong" Type="bit" />
+          <Property Name="DiemYeuCau" Type="int" />
         </EntityType>
         <EntityType Name="PhuKienMuaKem">
           <Key>
@@ -128,6 +131,9 @@
           <Property Name="TrangThai" Type="bit" />
           <Property Name="NgayTao" Type="datetime" />
           <Property Name="DanhSachQuyen" Type="nvarchar(max)" />
+          <Property Name="DiemTichLuy" Type="int" />
+          <Property Name="DiemHienTai" Type="int" />
+          <Property Name="Avatar" Type="nvarchar(max)" />
         </EntityType>
         <EntityType Name="ThongSoKyThuat">
           <Key>
@@ -151,6 +157,16 @@
           <Property Name="NoiDung" Type="nvarchar(max)" Nullable="false" />
           <Property Name="MaTK_Tao" Type="int" Nullable="false" />
           <Property Name="NgayDang" Type="datetime" />
+        </EntityType>
+        <EntityType Name="ViVoucher">
+          <Key>
+            <PropertyRef Name="MaVi" />
+          </Key>
+          <Property Name="MaVi" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="MaTK" Type="int" Nullable="false" />
+          <Property Name="MaVoucher" Type="varchar" MaxLength="20" Nullable="false" />
+          <Property Name="TrangThaiSD" Type="bit" />
+          <Property Name="NgayDoi" Type="datetime" />
         </EntityType>
         <EntityType Name="YeuThich">
           <Key>
@@ -341,6 +357,30 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_ViVoucher_MaGiamGia">
+          <End Role="MaGiamGia" Type="Self.MaGiamGia" Multiplicity="1" />
+          <End Role="ViVoucher" Type="Self.ViVoucher" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="MaGiamGia">
+              <PropertyRef Name="MaVoucher" />
+            </Principal>
+            <Dependent Role="ViVoucher">
+              <PropertyRef Name="MaVoucher" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ViVoucher_TaiKhoan">
+          <End Role="TaiKhoan" Type="Self.TaiKhoan" Multiplicity="1" />
+          <End Role="ViVoucher" Type="Self.ViVoucher" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="TaiKhoan">
+              <PropertyRef Name="MaTK" />
+            </Principal>
+            <Dependent Role="ViVoucher">
+              <PropertyRef Name="MaTK" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <EntityContainer Name="CellphonesStoreModelStoreContainer">
           <EntitySet Name="Banner" EntityType="Self.Banner" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="ChiTietDonHang" EntityType="Self.ChiTietDonHang" Schema="dbo" store:Type="Tables" />
@@ -355,6 +395,7 @@
           <EntitySet Name="TaiKhoan" EntityType="Self.TaiKhoan" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="ThongSoKyThuat" EntityType="Self.ThongSoKyThuat" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="TinTuc" EntityType="Self.TinTuc" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="ViVoucher" EntityType="Self.ViVoucher" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="YeuThich" EntityType="Self.YeuThich" Schema="dbo" store:Type="Tables" />
           <AssociationSet Name="FK__ChiTietDon__MaDH__60A75C0F" Association="Self.FK__ChiTietDon__MaDH__60A75C0F">
             <End Role="DonHang" EntitySet="DonHang" />
@@ -415,6 +456,14 @@
           <AssociationSet Name="FK__YeuThich__MaTK__6C190EBB" Association="Self.FK__YeuThich__MaTK__6C190EBB">
             <End Role="TaiKhoan" EntitySet="TaiKhoan" />
             <End Role="YeuThich" EntitySet="YeuThich" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ViVoucher_MaGiamGia" Association="Self.FK_ViVoucher_MaGiamGia">
+            <End Role="MaGiamGia" EntitySet="MaGiamGia" />
+            <End Role="ViVoucher" EntitySet="ViVoucher" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ViVoucher_TaiKhoan" Association="Self.FK_ViVoucher_TaiKhoan">
+            <End Role="TaiKhoan" EntitySet="TaiKhoan" />
+            <End Role="ViVoucher" EntitySet="ViVoucher" />
           </AssociationSet>
         </EntityContainer>
       </Schema></edmx:StorageModels>
@@ -486,6 +535,7 @@
           <NavigationProperty Name="TaiKhoan" Relationship="Self.FK__DonHang__MaNVDuy__5BE2A6F2" FromRole="DonHang" ToRole="TaiKhoan" />
           <NavigationProperty Name="TaiKhoan1" Relationship="Self.FK__DonHang__MaTK__5AEE82B9" FromRole="DonHang" ToRole="TaiKhoan" />
           <NavigationProperty Name="MaGiamGia" Relationship="Self.FK__DonHang__MaVouch__5CD6CB2B" FromRole="DonHang" ToRole="MaGiamGia" />
+          <Property Name="DaCongDiem" Type="Boolean" />
         </EntityType>
         <EntityType Name="HangSanXuat">
           <Key>
@@ -509,6 +559,9 @@
           <Property Name="NgayKetThuc" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="SoLuong" Type="Int32" Nullable="false" />
           <NavigationProperty Name="DonHang" Relationship="Self.FK__DonHang__MaVouch__5CD6CB2B" FromRole="MaGiamGia" ToRole="DonHang" />
+          <Property Name="HienThiDoiThuong" Type="Boolean" />
+          <Property Name="DiemYeuCau" Type="Int32" />
+          <NavigationProperty Name="ViVoucher" Relationship="CellphonesStoreModel.FK_ViVoucher_MaGiamGia" FromRole="MaGiamGia" ToRole="ViVoucher" />
         </EntityType>
         <EntityType Name="SanPham">
           <Key>
@@ -550,6 +603,10 @@
           <NavigationProperty Name="TinTuc" Relationship="Self.FK__TinTuc__MaTK_Tao__70DDC3D8" FromRole="TaiKhoan" ToRole="TinTuc" />
           <NavigationProperty Name="YeuThich" Relationship="Self.FK__YeuThich__MaTK__6C190EBB" FromRole="TaiKhoan" ToRole="YeuThich" />
           <Property Name="DanhSachQuyen" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="DiemTichLuy" Type="Int32" />
+          <Property Name="DiemHienTai" Type="Int32" />
+          <NavigationProperty Name="ViVoucher" Relationship="CellphonesStoreModel.FK_ViVoucher_TaiKhoan" FromRole="TaiKhoan" ToRole="ViVoucher" />
+          <Property Name="Avatar" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
         </EntityType>
         <EntityType Name="ThongSoKyThuat">
           <Key>
@@ -817,6 +874,15 @@
             <End Role="SanPham1" EntitySet="SanPham" />
           </AssociationSet>
           <EntitySet Name="sysdiagrams" EntityType="CellphonesStoreModel.sysdiagrams" />
+          <EntitySet Name="ViVoucher" EntityType="CellphonesStoreModel.ViVoucher" />
+          <AssociationSet Name="FK_ViVoucher_MaGiamGia" Association="CellphonesStoreModel.FK_ViVoucher_MaGiamGia">
+            <End Role="MaGiamGia" EntitySet="MaGiamGia" />
+            <End Role="ViVoucher" EntitySet="ViVoucher" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ViVoucher_TaiKhoan" Association="CellphonesStoreModel.FK_ViVoucher_TaiKhoan">
+            <End Role="TaiKhoan" EntitySet="TaiKhoan" />
+            <End Role="ViVoucher" EntitySet="ViVoucher" />
+          </AssociationSet>
         </EntityContainer>
         <EntityType Name="sysdiagrams">
           <Key>
@@ -828,6 +894,42 @@
           <Property Name="version" Type="Int32" />
           <Property Name="definition" Type="Binary" MaxLength="Max" FixedLength="false" />
         </EntityType>
+        <EntityType Name="ViVoucher">
+          <Key>
+            <PropertyRef Name="MaVi" />
+          </Key>
+          <Property Name="MaVi" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="MaTK" Type="Int32" Nullable="false" />
+          <Property Name="MaVoucher" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="TrangThaiSD" Type="Boolean" />
+          <Property Name="NgayDoi" Type="DateTime" Precision="3" />
+          <NavigationProperty Name="MaGiamGia" Relationship="CellphonesStoreModel.FK_ViVoucher_MaGiamGia" FromRole="ViVoucher" ToRole="MaGiamGia" />
+          <NavigationProperty Name="TaiKhoan" Relationship="CellphonesStoreModel.FK_ViVoucher_TaiKhoan" FromRole="ViVoucher" ToRole="TaiKhoan" />
+        </EntityType>
+        <Association Name="FK_ViVoucher_MaGiamGia">
+          <End Type="CellphonesStoreModel.MaGiamGia" Role="MaGiamGia" Multiplicity="1" />
+          <End Type="CellphonesStoreModel.ViVoucher" Role="ViVoucher" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="MaGiamGia">
+              <PropertyRef Name="MaVoucher" />
+            </Principal>
+            <Dependent Role="ViVoucher">
+              <PropertyRef Name="MaVoucher" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ViVoucher_TaiKhoan">
+          <End Type="CellphonesStoreModel.TaiKhoan" Role="TaiKhoan" Multiplicity="1" />
+          <End Type="CellphonesStoreModel.ViVoucher" Role="ViVoucher" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="TaiKhoan">
+              <PropertyRef Name="MaTK" />
+            </Principal>
+            <Dependent Role="ViVoucher">
+              <PropertyRef Name="MaTK" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -880,6 +982,7 @@
           <EntitySetMapping Name="DonHang">
             <EntityTypeMapping TypeName="CellphonesStoreModel.DonHang">
               <MappingFragment StoreEntitySet="DonHang">
+                <ScalarProperty Name="DaCongDiem" ColumnName="DaCongDiem" />
                 <ScalarProperty Name="MaDH" ColumnName="MaDH" />
                 <ScalarProperty Name="MaTK" ColumnName="MaTK" />
                 <ScalarProperty Name="MaNVDuyet" ColumnName="MaNVDuyet" />
@@ -908,6 +1011,8 @@
           <EntitySetMapping Name="MaGiamGia">
             <EntityTypeMapping TypeName="CellphonesStoreModel.MaGiamGia">
               <MappingFragment StoreEntitySet="MaGiamGia">
+                <ScalarProperty Name="DiemYeuCau" ColumnName="DiemYeuCau" />
+                <ScalarProperty Name="HienThiDoiThuong" ColumnName="HienThiDoiThuong" />
                 <ScalarProperty Name="MaVoucher" ColumnName="MaVoucher" />
                 <ScalarProperty Name="PhanTramGiam" ColumnName="PhanTramGiam" />
                 <ScalarProperty Name="GiaTriToiDa" ColumnName="GiaTriToiDa" />
@@ -935,6 +1040,9 @@
           <EntitySetMapping Name="TaiKhoan">
             <EntityTypeMapping TypeName="CellphonesStoreModel.TaiKhoan">
               <MappingFragment StoreEntitySet="TaiKhoan">
+                <ScalarProperty Name="Avatar" ColumnName="Avatar" />
+                <ScalarProperty Name="DiemHienTai" ColumnName="DiemHienTai" />
+                <ScalarProperty Name="DiemTichLuy" ColumnName="DiemTichLuy" />
                 <ScalarProperty Name="DanhSachQuyen" ColumnName="DanhSachQuyen" />
                 <ScalarProperty Name="MaTK" ColumnName="MaTK" />
                 <ScalarProperty Name="MaChucVu" ColumnName="MaChucVu" />
@@ -998,6 +1106,17 @@
                 <ScalarProperty Name="diagram_id" ColumnName="diagram_id" />
                 <ScalarProperty Name="principal_id" ColumnName="principal_id" />
                 <ScalarProperty Name="name" ColumnName="name" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="ViVoucher">
+            <EntityTypeMapping TypeName="CellphonesStoreModel.ViVoucher">
+              <MappingFragment StoreEntitySet="ViVoucher">
+                <ScalarProperty Name="NgayDoi" ColumnName="NgayDoi" />
+                <ScalarProperty Name="TrangThaiSD" ColumnName="TrangThaiSD" />
+                <ScalarProperty Name="MaVoucher" ColumnName="MaVoucher" />
+                <ScalarProperty Name="MaTK" ColumnName="MaTK" />
+                <ScalarProperty Name="MaVi" ColumnName="MaVi" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

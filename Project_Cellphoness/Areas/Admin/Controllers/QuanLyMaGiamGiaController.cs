@@ -34,9 +34,7 @@ namespace Project_Cellphoness.Areas.Admin.Controllers
                     return View(vc);
                 }
 
-                
                 // QĐ22: Validate ngày và hạn mức mã giảm giá
-               
                 if (vc.PhanTramGiam > 50)
                 {
                     ViewBag.ThongBao = "Quy định QĐ22: Mức giảm giá không được vượt quá 50%!";
@@ -48,7 +46,20 @@ namespace Project_Cellphoness.Areas.Admin.Controllers
                     ViewBag.ThongBao = "Quy định QĐ22: Ngày kết thúc phải lớn hơn ngày bắt đầu!";
                     return View(vc);
                 }
-                
+
+                // ==========================================
+                // LOGIC BIG UPDATE: VALIDATE ĐIỂM ĐỔI THƯỞNG
+                // ==========================================
+                if (vc.HienThiDoiThuong == true && (vc.DiemYeuCau == null || vc.DiemYeuCau < 0))
+                {
+                    ViewBag.ThongBao = "Lỗi: Khi chọn Hiển thị Đổi thưởng, Điểm yêu cầu không được để trống và phải >= 0!";
+                    return View(vc);
+                }
+
+                // Đảm bảo không bị null nếu admin không tick
+                if (vc.HienThiDoiThuong == null) vc.HienThiDoiThuong = false;
+                if (vc.DiemYeuCau == null) vc.DiemYeuCau = 0;
+                // ==========================================
 
                 db.MaGiamGia.Add(vc);
                 db.SaveChanges();

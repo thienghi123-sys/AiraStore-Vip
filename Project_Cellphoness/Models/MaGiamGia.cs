@@ -18,6 +18,7 @@ namespace Project_Cellphoness.Models
         public MaGiamGia()
         {
             this.DonHang = new HashSet<DonHang>();
+            this.ViVoucher = new HashSet<ViVoucher>();
         }
     
         public string MaVoucher { get; set; }
@@ -27,8 +28,12 @@ namespace Project_Cellphoness.Models
         public System.DateTime NgayBatDau { get; set; }
         public System.DateTime NgayKetThuc { get; set; }
         public int SoLuong { get; set; }
+        public Nullable<bool> HienThiDoiThuong { get; set; }
+        public Nullable<int> DiemYeuCau { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<DonHang> DonHang { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<ViVoucher> ViVoucher { get; set; }
     }
 }

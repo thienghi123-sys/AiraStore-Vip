@@ -3,40 +3,589 @@
 @{
     ViewBag.Title = "Quản lý Đơn hàng";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+
+    string currentSapXep = ViewBag.SapXep as string ?? "moi_nhat";
+    string currentTrangThai = ViewBag.TrangThai as string ?? "all";
+    int tongSoDon = ViewBag.TongSoDon != null ? (int)ViewBag.TongSoDon : (Model != null ? Model.Count() : 0);
+    decimal tongDoanhThuLoc = ViewBag.TongDoanhThuLoc != null ? (decimal)ViewBag.TongDoanhThuLoc : 0;
 }
 
-<div style="max-width: 1000px; margin: 20px auto; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
-    <h2 style="color: #333; border-bottom: 2px solid var(--red-cps); padding-bottom: 10px;"><i class="fa-solid fa-clipboard-list"></i> DANH SÁCH ĐƠN HÀNG</h2>
+<style>
+    .admin-order-wrapper {
+        max-width: 1180px;
+        margin: 20px auto;
+        background: #fff;
+        padding: 28px;
+        border-radius: 14px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.06);
+    }
 
-    <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
-        <thead>
-            <tr style="background-color: #f8f9fa; text-align: left; border-bottom: 2px solid #dee2e6;">
-                <th style="padding: 12px; font-weight: bold; color: #495057;">Mã ĐH</th>
-                <th style="padding: 12px; font-weight: bold; color: #495057;">Khách Hàng</th>
-                <th style="padding: 12px; font-weight: bold; color: #495057;">Ngày Đặt</th>
-                <th style="padding: 12px; font-weight: bold; color: #495057;">Tổng Tiền</th>
-                <th style="padding: 12px; font-weight: bold; color: #495057; text-align: center;">Thao Tác</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model)
-            {
-                <tr style="border-bottom: 1px solid #e9ecef;">
-                    <td style="padding: 12px; font-weight: bold;">#@item.MaDH</td>
-                    <td style="padding: 12px;">@item.HoTenNhan<br /><small style="color: #6c757d;">@item.SDTNhan</small></td>
-                    <td style="padding: 12px;">@(item.NgayDat.HasValue ? item.NgayDat.Value.ToString("dd/MM/yyyy HH:mm") : "")</td>
-                    <td style="padding: 12px; color: var(--red-cps); font-weight: bold;">@String.Format("{0:0,0}", item.TongTien).Replace(",", ".") đ</td>
-                    <td style="padding: 12px; text-align: center;">
-                        <a href="@Url.Action("ChiTiet", "QuanLyDonHang", new { id = item.MaDH })" style="background: #17a2b8; color: #fff; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 14px; display: inline-block; margin-right: 5px;">
-                            <i class="fa-solid fa-eye"></i> Xem
-                        </a>
+    /* HEADER & THẺ THỐNG KÊ NHANH */
+    .admin-order-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 15px;
+        border-bottom: 2px solid #f1f3f5;
+        padding-bottom: 18px;
+        margin-bottom: 22px;
+    }
 
-                        <a href="@Url.Action("InHoaDon", "QuanLyDonHang", new { id = item.MaDH })" target="_blank" style="background-color: #28a745; color: white; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 14px; display: inline-block;">
-                            <i class="fa-solid fa-print"></i> In
-                        </a>
-                    </td>
-                </tr>
+    .admin-order-title {
+        margin: 0;
+        color: #222;
+        font-size: 22px;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+        .admin-order-title i {
+            color: var(--red-cps, #D70018);
+        }
+
+    .quick-stats-bar {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .stat-pill {
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        padding: 8px 16px;
+        border-radius: 10px;
+        font-size: 13.5px;
+        color: #555;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+        .stat-pill b {
+            font-size: 15px;
+            color: #222;
+        }
+
+        .stat-pill.revenue {
+            background: #fff5f5;
+            border-color: #ffcdd2;
+        }
+
+            .stat-pill.revenue b {
+                color: var(--red-cps, #D70018);
+                font-weight: 800;
             }
-        </tbody>
-    </table>
+
+    /* KHUNG BỘ LỌC TÌM KIẾM HIỆN ĐẠI */
+    .filter-panel {
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 12px;
+        padding: 18px 20px;
+        margin-bottom: 22px;
+    }
+
+    .filter-grid {
+        display: grid;
+        grid-template-columns: 2fr 1.2fr 1.2fr 1.3fr 1.4fr;
+        gap: 12px;
+        align-items: end;
+    }
+
+    @@media (max-width: 992px) {
+        .filter-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+
+    .filter-group label {
+        display: block;
+        font-size: 12px;
+        font-weight: 700;
+        color: #555;
+        margin-bottom: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+
+    .filter-input, .filter-select {
+        width: 100%;
+        height: 40px;
+        padding: 0 12px;
+        border: 1px solid #ced4da;
+        border-radius: 8px;
+        font-size: 13.5px;
+        background: #fff;
+        color: #333;
+        box-sizing: border-box;
+        outline: none;
+        transition: all 0.2s;
+    }
+
+        .filter-input:focus, .filter-select:focus {
+            border-color: var(--red-cps, #D70018);
+            box-shadow: 0 0 0 3px rgba(215, 0, 24, 0.12);
+        }
+
+    .filter-actions-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 14px;
+        padding-top: 12px;
+        border-top: 1px dashed #dee2e6;
+    }
+
+    .quick-date-btns {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+        .quick-date-btns span {
+            font-size: 12.5px;
+            color: #666;
+            font-weight: 600;
+        }
+
+    .btn-quick-date {
+        background: #fff;
+        border: 1px solid #ced4da;
+        color: #495057;
+        padding: 5px 11px;
+        border-radius: 15px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+        .btn-quick-date:hover {
+            border-color: var(--red-cps, #D70018);
+            color: var(--red-cps, #D70018);
+            background: #fff5f5;
+        }
+
+    .submit-btns-wrap {
+        display: flex;
+        gap: 10px;
+    }
+
+    .btn-filter-submit {
+        background: linear-gradient(135deg, #D70018, #ff4b2b);
+        color: #fff;
+        border: none;
+        padding: 9px 20px;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 13.5px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        box-shadow: 0 3px 10px rgba(215, 0, 24, 0.25);
+        transition: 0.2s;
+    }
+
+        .btn-filter-submit:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 5px 14px rgba(215, 0, 24, 0.35);
+        }
+
+    .btn-filter-reset {
+        background: #e9ecef;
+        color: #495057;
+        text-decoration: none;
+        padding: 9px 16px;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 13.5px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: 0.2s;
+    }
+
+        .btn-filter-reset:hover {
+            background: #dee2e6;
+            color: #222;
+        }
+
+    /* BẢNG ĐƠN HÀNG HIỆN ĐẠI */
+    .admin-order-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        .admin-order-table thead tr {
+            background: #2c3034;
+            color: #fff;
+            text-align: left;
+        }
+
+        .admin-order-table th {
+            padding: 13px 14px;
+            font-size: 12.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        .admin-order-table thead th:first-child {
+            border-top-left-radius: 8px;
+            border-bottom-left-radius: 8px;
+        }
+
+        .admin-order-table thead th:last-child {
+            border-top-right-radius: 8px;
+            border-bottom-right-radius: 8px;
+        }
+
+        .admin-order-table tbody tr {
+            border-bottom: 1px solid #f0f2f5;
+            transition: background 0.2s ease;
+        }
+
+            .admin-order-table tbody tr:hover {
+                background-color: #fff9fa;
+            }
+
+        .admin-order-table td {
+            padding: 14px;
+            vertical-align: middle;
+            font-size: 14px;
+        }
+
+    .cust-name {
+        font-weight: 700;
+        color: #222;
+        font-size: 14.5px;
+        margin-bottom: 3px;
+    }
+
+    .cust-meta {
+        font-size: 12.5px;
+        color: #6c757d;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .order-status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 5px 11px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .st-pending {
+        background: #e7f1ff;
+        color: #007bff;
+    }
+
+    .st-shipping {
+        background: #fff3cd;
+        color: #b78103;
+    }
+
+    .st-done {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .st-cancel {
+        background: #f8d7da;
+        color: #dc3545;
+    }
+
+    .btn-act {
+        padding: 7px 12px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        transition: 0.2s;
+    }
+
+    .btn-act-view {
+        background: #17a2b8;
+        color: #fff;
+        margin-right: 5px;
+    }
+
+        .btn-act-view:hover {
+            background: #138496;
+            transform: translateY(-1px);
+        }
+
+    .btn-act-print {
+        background: #28a745;
+        color: #fff;
+    }
+
+        .btn-act-print:hover {
+            background: #218838;
+            transform: translateY(-1px);
+        }
+</style>
+
+<div class="admin-order-wrapper">
+    <!-- TIÊU ĐỀ & THỐNG KÊ NHANH -->
+    <div class="admin-order-top">
+        <h2 class="admin-order-title">
+            <i class="fa-solid fa-clipboard-list"></i> QUẢN LÝ ĐƠN HÀNG
+        </h2>
+
+        <div class="quick-stats-bar">
+            <div class="stat-pill">
+                <i class="fa-solid fa-boxes-stacked" style="color: #007bff;"></i>
+                <span>Số đơn hiển thị: <b>@tongSoDon đơn</b></span>
+            </div>
+            <div class="stat-pill revenue">
+                <i class="fa-solid fa-sack-dollar" style="color: #D70018;"></i>
+                <span>Tổng doanh thu (trừ đơn hủy): <b>@String.Format("{0:0,0}", tongDoanhThuLoc).Replace(",", ".") đ</b></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- THANH CÔNG CỤ TÌM KIẾM, LỌC KHOẢNG NGÀY & SẮP XẾP -->
+    <form action="@Url.Action("Index", "QuanLyDonHang")" method="get" id="filterOrderForm" class="filter-panel">
+        <div class="filter-grid">
+            <!-- 1. Từ khóa: Tên KH, SĐT, Email, Mã ĐH (Đã thêm oninput để lọc mượt ngay khi gõ) -->
+            <div class="filter-group">
+                <label><i class="fa-solid fa-magnifying-glass"></i> Tìm kiếm khách hàng / Đơn hàng</label>
+                <input type="text" name="tuKhoa" id="txtLiveSearchOrder" value="@ViewBag.TuKhoa" class="filter-input" placeholder="Gõ tên (vd: khoa), SĐT, Email hoặc #Mã ĐH..." oninput="locNhanhTrenBang()" autocomplete="off" />
+            </div>
+
+            <!-- 2. Từ ngày -->
+            <div class="filter-group">
+                <label><i class="fa-regular fa-calendar-days"></i> Từ ngày</label>
+                <input type="date" name="tuNgay" id="txtTuNgay" value="@ViewBag.TuNgay" class="filter-input" />
+            </div>
+
+            <!-- 3. Đến ngày -->
+            <div class="filter-group">
+                <label><i class="fa-regular fa-calendar-check"></i> Đến ngày</label>
+                <input type="date" name="denNgay" id="txtDenNgay" value="@ViewBag.DenNgay" class="filter-input" />
+            </div>
+
+            <!-- 4. Lọc theo trạng thái -->
+            <div class="filter-group">
+                <label><i class="fa-solid fa-filter"></i> Trạng thái đơn</label>
+                <select name="trangThai" class="filter-select" onchange="document.getElementById('filterOrderForm').submit();">
+                    <option value="all" @(currentTrangThai == "all" ? "selected" : "")>-- Tất cả trạng thái --</option>
+                    <option value="Chờ duyệt" @(currentTrangThai == "Chờ duyệt" ? "selected" : "")>⏳ Chờ duyệt</option>
+                    <option value="Đang giao hàng" @(currentTrangThai == "Đang giao hàng" ? "selected" : "")>🚚 Đang giao hàng</option>
+                    <option value="Hoàn thành" @(currentTrangThai == "Hoàn thành" ? "selected" : "")>✅ Hoàn thành</option>
+                    <option value="Đã hủy" @(currentTrangThai == "Đã hủy" ? "selected" : "")>❌ Đã hủy</option>
+                </select>
+            </div>
+
+            <!-- 5. Sắp xếp Giá tiền / Ngày đặt -->
+            <div class="filter-group">
+                <label><i class="fa-solid fa-arrow-up-wide-short"></i> Sắp xếp theo</label>
+                <select name="sapXep" class="filter-select" onchange="document.getElementById('filterOrderForm').submit();">
+                    <option value="moi_nhat" @(currentSapXep == "moi_nhat" ? "selected" : "")>🕒 Ngày đặt: Mới nhất</option>
+                    <option value="cu_nhat" @(currentSapXep == "cu_nhat" ? "selected" : "")>🕒 Ngày đặt: Cũ nhất</option>
+                    <option value="gia_giam" @(currentSapXep == "gia_giam" ? "selected" : "")>💰 Giá tiền: Cao ➔ Thấp</option>
+                    <option value="gia_tang" @(currentSapXep == "gia_tang" ? "selected" : "")>💰 Giá tiền: Thấp ➔ Cao</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="filter-actions-row">
+            <div class="quick-date-btns">
+                <span><i class="fa-solid fa-bolt" style="color: #ff9800;"></i> Chọn nhanh khoảng ngày:</span>
+                <button type="button" class="btn-quick-date" onclick="chonNhanhNgay(0)">Hôm nay</button>
+                <button type="button" class="btn-quick-date" onclick="chonNhanhNgay(7)">7 ngày qua</button>
+                <button type="button" class="btn-quick-date" onclick="chonNhanhNgay(30)">30 ngày qua</button>
+                <button type="button" class="btn-quick-date" onclick="chonThangNay()">Tháng này</button>
+            </div>
+
+            <div class="submit-btns-wrap">
+                <a href="@Url.Action("Index", "QuanLyDonHang")" class="btn-filter-reset">
+                    <i class="fa-solid fa-rotate-left"></i> Làm mới
+                </a>
+                <button type="submit" class="btn-filter-submit">
+                    <i class="fa-solid fa-sliders"></i> Áp dụng lọc
+                </button>
+            </div>
+        </div>
+    </form>
+
+    <!-- BẢNG DỮ LIỆU ĐƠN HÀNG -->
+    @if (Model != null && Model.Any())
+    {
+        <div style="overflow-x: auto;">
+            <table class="admin-order-table">
+                <thead>
+                    <tr>
+                        <th>Mã ĐH</th>
+                        <th>Thông Tin Khách Hàng</th>
+                        <th>Ngày Đặt</th>
+                        <th>Tổng Tiền</th>
+                        <th>Trạng Thái</th>
+                        <th style="text-align: center;">Thao Tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        string tenHienThi = !string.IsNullOrEmpty(item.HoTenNhan)
+                            ? item.HoTenNhan
+                            : (item.TaiKhoan != null ? item.TaiKhoan.HoTen : "Khách vãng lai");
+
+                        string sdtHienThi = !string.IsNullOrEmpty(item.SDTNhan)
+                            ? item.SDTNhan
+                            : (item.TaiKhoan != null ? item.TaiKhoan.SoDienThoai : "");
+
+                        string emailHienThi = item.TaiKhoan != null ? item.TaiKhoan.Email : "";
+                        string st = string.IsNullOrEmpty(item.TrangThaiDH) ? "Chờ duyệt" : item.TrangThaiDH;
+
+                        <tr>
+                            <td style="font-weight: 800; color: #222; font-size: 15px;">#@item.MaDH</td>
+                            <td>
+                                <div class="cust-name">@tenHienThi</div>
+                                <div class="cust-meta">
+                                    @if (!string.IsNullOrEmpty(sdtHienThi))
+                                    {
+                                        <span><i class="fa-solid fa-phone" style="width:14px; color:#28a745;"></i> @sdtHienThi</span>
+                                    }
+                                    @if (!string.IsNullOrEmpty(emailHienThi))
+                                    {
+                                        <span><i class="fa-regular fa-envelope" style="width:14px; color:#007bff;"></i> @emailHienThi</span>
+                                    }
+                                </div>
+                            </td>
+                            <td style="color: #555;">
+                                <i class="fa-regular fa-calendar" style="color:#888; margin-right:4px;"></i>
+                                @(item.NgayDat.HasValue ? item.NgayDat.Value.ToString("dd/MM/yyyy HH:mm") : "")
+                            </td>
+                            <td style="color: var(--red-cps, #D70018); font-weight: 800; font-size: 15px;">
+                                @String.Format("{0:0,0}", item.TongTien).Replace(",", ".") đ
+                            </td>
+                            <td>
+                                @if (st == "Chờ duyệt")
+                                {
+                                    <span class="order-status-pill st-pending"><i class="fa-regular fa-clock"></i> Chờ duyệt</span>
+                                }
+                                else if (st.Contains("Đã hủy"))
+                                {
+                                    <span class="order-status-pill st-cancel"><i class="fa-solid fa-ban"></i> @st</span>
+                                }
+                                else if (st.Contains("giao"))
+                                {
+                                    <span class="order-status-pill st-shipping"><i class="fa-solid fa-truck-fast"></i> @st</span>
+                                }
+                                else
+                                {
+                                    <span class="order-status-pill st-done"><i class="fa-solid fa-circle-check"></i> @st</span>
+                                }
+                            </td>
+                            <td style="text-align: center; white-space: nowrap;">
+                                <a href="@Url.Action("ChiTiet", "QuanLyDonHang", new { id = item.MaDH })" class="btn-act btn-act-view">
+                                    <i class="fa-solid fa-eye"></i> Xem
+                                </a>
+
+                                <a href="@Url.Action("InHoaDon", "QuanLyDonHang", new { id = item.MaDH })" target="_blank" class="btn-act btn-act-print">
+                                    <i class="fa-solid fa-print"></i> In
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div style="text-align: center; padding: 55px 20px; background: #fdfdfd; border: 1px dashed #ced4da; border-radius: 12px;">
+            <i class="fa-solid fa-magnifying-glass-minus" style="font-size: 48px; color: #adb5bd; margin-bottom: 12px;"></i>
+            <h3 style="color: #495057; margin: 0 0 8px 0; font-size: 18px;">Không tìm thấy đơn hàng nào khớp với bộ lọc!</h3>
+            <p style="color: #888; font-size: 14px; margin: 0 0 16px 0;">Bạn hãy thử thay đổi từ khóa tìm kiếm hoặc mở rộng khoảng ngày xem sao nhé.</p>
+            <a href="@Url.Action("Index", "QuanLyDonHang")" class="btn-filter-reset" style="background: var(--red-cps, #D70018); color: #fff;">
+                <i class="fa-solid fa-rotate-left"></i> Xem toàn bộ đơn hàng
+            </a>
+        </div>
+    }
 </div>
+
+<script>
+    function formatDateYMD(date) {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const d = String(date.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+    }
+
+    function chonNhanhNgay(soNgayTruoc) {
+        const today = new Date();
+        const start = new Date();
+        start.setDate(today.getDate() - soNgayTruoc);
+
+        document.getElementById('txtTuNgay').value = formatDateYMD(start);
+        document.getElementById('txtDenNgay').value = formatDateYMD(today);
+        document.getElementById('filterOrderForm').submit();
+    }
+
+    function chonThangNay() {
+        const today = new Date();
+        const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+
+        document.getElementById('txtTuNgay').value = formatDateYMD(firstDay);
+        document.getElementById('txtDenNgay').value = formatDateYMD(today);
+        document.getElementById('filterOrderForm').submit();
+    }
+
+    // Hàm chuẩn hóa bỏ dấu tiếng Việt
+    function boDauJS(str) {
+        if (!str) return '';
+        return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D').toLowerCase();
+    }
+
+    // Lọc mượt mà ngay trên bảng (Đã sửa lỗi phân tách từ chính xác, không bị dính chữ cái bậy bạ)
+    function locNhanhTrenBang() {
+        const inputVal = boDauJS(document.getElementById('txtLiveSearchOrder').value.trim().replace('#', ''));
+        if (!inputVal) {
+            // Nếu ô tìm kiếm trống, hiển thị lại toàn bộ các dòng
+            document.querySelectorAll('.admin-order-table tbody tr').forEach(row => row.style.display = '');
+            return;
+        }
+
+        const keywords = inputVal.split(/\s+/).filter(Boolean);
+        const rows = document.querySelectorAll('.admin-order-table tbody tr');
+
+        rows.forEach(row => {
+            // Lấy riêng từng phần quan trọng trong dòng để kiểm tra chính xác tuyệt đối:
+            // 1. Mã đơn hàng (cột 1)
+            // 2. Tên khách hàng (cột 2 - dòng tên)
+            // 3. Số điện thoại & Email (cột 2 - phần meta)
+            const maDH = boDauJS(row.cells[0].innerText);
+            const tenKH = boDauJS(row.cells[1].querySelector('.cust-name') ? row.cells[1].querySelector('.cust-name').innerText : '');
+            const metaInfo = boDauJS(row.cells[1].querySelector('.cust-meta') ? row.cells[1].querySelector('.cust-meta').innerText : '');
+
+            const rowCombinedText = `${maDH} ${tenKH} ${metaInfo}`;
+
+            // Kiểm tra: Mọi từ khóa người dùng gõ phải xuất hiện trọn vẹn trong thông tin đơn hàng
+            const isMatch = keywords.every(kw => {
+                // Tách từng từ để so khớp biên giới từ (word boundary) hoặc chứa chuỗi từ chuẩn
+                const regex = new RegExp(kw, 'i');
+                return regex.test(rowCombinedText);
+            });
+
+            row.style.display = isMatch ? '' : 'none';
+        });
+    }
+</script>

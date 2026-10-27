@@ -51,8 +51,52 @@
             </div>
         </div>
 
+        <!-- ========================================== -->
+        <!-- LOGIC BIG UPDATE: CẤU HÌNH ĐỔI THƯỞNG -->
+        <!-- ========================================== -->
+        <div style="background: #fff8e1; border: 1px solid #ffe082; padding: 20px; border-radius: 8px; margin-top: 15px; margin-bottom: 25px;">
+            <h4 style="margin: 0 0 15px 0; color: #f57f17;"><i class="fa-solid fa-gift"></i> Cấu hình Đổi Thưởng (Tính năng Loyalty)</h4>
+
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                <!-- Dùng CheckBoxFor để lấy giá trị bool (true/false) -->
+                @Html.CheckBox("HienThiDoiThuong", false, new { id = "cbHienThiDoiThuong", style = "width: 22px; height: 22px; cursor: pointer;" })
+                <label for="cbHienThiDoiThuong" style="font-weight: bold; cursor: pointer; color: #333; margin: 0; font-size: 16px;">Phát hành mã này lên trang "Đổi Thưởng"</label>
+            </div>
+
+            <p style="color: #666; font-size: 13px; margin-top: -10px; margin-bottom: 15px; margin-left: 32px;">
+                (Bỏ chọn nếu đây là mã ẩn độc quyền tặng riêng cho khách, không muốn public đại trà)
+            </p>
+
+            <div id="khuVucNhapDiem" style="display: none; margin-left: 32px;">
+                <label style="font-weight: bold; color: #d32f2f;">Số điểm khách cần có để đổi mã này:</label>
+                @Html.TextBoxFor(m => m.DiemYeuCau, new { type = "number", min = "0", @class = "form-control", style = "width:100%; max-width: 300px; padding:10px; margin:5px 0 5px 0; border:1px solid #d32f2f; border-radius: 5px; outline: none;" })
+                <div style="color: #888; font-size: 13px; font-style: italic;">Hệ thống sẽ tự động trừ số điểm này của khách khi họ bấm đổi.</div>
+            </div>
+        </div>
+
         <button type="submit" style="background: #28a745; color: white; border: none; padding: 12px 20px; border-radius: 5px; font-weight: bold; cursor: pointer; width: 100%; font-size: 16px;">
             <i class="fa-solid fa-floppy-disk"></i> LƯU MÃ KHUYẾN MÃI
         </button>
     }
 </div>
+
+<!-- SCRIPT ẨN/HIỆN Ô NHẬP ĐIỂM -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var checkbox = document.getElementById("cbHienThiDoiThuong");
+        var khuVucDiem = document.getElementById("khuVucNhapDiem");
+
+        function toggleDiem() {
+            if (checkbox.checked) {
+                khuVucDiem.style.display = "block";
+            } else {
+                khuVucDiem.style.display = "none";
+            }
+        }
+
+        // Bắt sự kiện khi click
+        checkbox.addEventListener("change", toggleDiem);
+        // Chạy lần đầu khi load trang
+        toggleDiem();
+    });
+</script>
